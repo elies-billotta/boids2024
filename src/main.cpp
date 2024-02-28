@@ -1,8 +1,11 @@
 #include <cstdlib>
+#include <vector>
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest/doctest.h"
 #include "p6/p6.h"
 #include "boids.hpp"
+
+const int N = 100;
 
 int main()
 {
@@ -13,21 +16,19 @@ int main()
     // Actual application code
     auto ctx = p6::Context{{.title = "Boids will be boids"}};
     ctx.maximize_window();
+    Boid boid1 = Boid(0.0f, 0.0f, 0.00001f, 0.00001f);
 
-    //declare boids
-    Boid boid1 = Boid(0.0f, 0.0f, 0.01f, 0.01f);
+    std::vector<Boid> boids;
 
-    // Declare your infinite update loop.
+    for (int i = 0 ; i < N ; i++){
+        boids.emplace_back(0.0f, 0.0f, 0.01f, 0.01f);
+    }
     ctx.update = [&]() {
-        // ctx.background(p6::NamedColor::Blue);
-        // ctx.circle(
-        //     p6::Center{ctx.mouse()},
-        //     p6::Radius{0.2f}
-        // );
-        boid1.update();
-        boid1.draw(ctx);
+        ctx.background(p6::NamedColor::Black);
+        for (Boid &b : boids){
+            b.update();
+            b.draw(ctx);
+        }
     };
-
-    // Should be done last. It starts the infinite loop.
     ctx.start();
 }

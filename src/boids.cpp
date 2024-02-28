@@ -3,10 +3,10 @@
 // Constructor
 Boid::Boid(float x, float y, float vx, float vy)
 {
-    positionX = x;
-    positionY = y;
-    velocityX = vx;
-    velocityY = vy;
+    position.x = x;
+    position.y = y;
+    velocity.x = vx;
+    velocity.y = vy;
 }
 
 // Destructor
@@ -17,15 +17,15 @@ Boid::~Boid()
 // Methods
 void Boid::update()
 {
-    positionX += velocityX;
-    positionY += velocityY;
+    position.x += velocity.x;
+    position.y += velocity.y;
 }
 
 void Boid::draw(p6::Context& ctx)
 {
     ctx.triangle(
-        p6::Point2D{positionX-0.1f, positionY-0.1f},
-        p6::Point2D{positionX + 0.1f, positionY + 0.1f},
-        p6::Point2D{positionX - 0.1f, positionY + 0.1f}
+        p6::Point2D{position.x-0.1f, position.y-0.1f},
+        p6::Point2D{position.x + 0.1f, position.y + 0.1f},
+        p6::Point2D{position.x - 0.1f, position.y + 0.1f}
     );
 }

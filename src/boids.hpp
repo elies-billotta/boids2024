@@ -1,3 +1,4 @@
+#include "glm/fwd.hpp"
 #include "p6/p6.h"
 
 #pragma once
@@ -15,8 +16,6 @@ public:
     void draw(p6::Context& ctx);
 
 private:
-    float positionX;
-    float positionY;
-    float velocityX;
-    float velocityY;
+    glm::vec2 position;
+    glm::vec2 velocity;
 };
