@@ -32,6 +32,7 @@ int main()
         {
             b.update();
             b.draw(ctx, areaSize);
+            
         }
     };
     ctx.start();
