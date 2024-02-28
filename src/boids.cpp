@@ -23,11 +23,7 @@ void Boid::update()
 
 void Boid::draw(p6::Context& ctx, float areaSize)
 {
-    ctx.triangle(
-        p6::Point2D{position.x-0.03f, position.y-0.03f},
-        p6::Point2D{position.x + 0.03f, position.y + 0.03f},
-        p6::Point2D{position.x - 0.03f, position.y + 0.03f}
-    );
+    ctx.circle(p6::Center(position.x-0.03f, position.y-0.03f), p6::Radius(0.03f));
     if (position.x > areaSize)
     {
         position.x = -areaSize;
