@@ -21,11 +21,27 @@ void Boid::update()
     position.y += velocity.y;
 }
 
-void Boid::draw(p6::Context& ctx)
+void Boid::draw(p6::Context& ctx, float areaSize)
 {
     ctx.triangle(
-        p6::Point2D{position.x-0.1f, position.y-0.1f},
-        p6::Point2D{position.x + 0.1f, position.y + 0.1f},
-        p6::Point2D{position.x - 0.1f, position.y + 0.1f}
+        p6::Point2D{position.x-0.03f, position.y-0.03f},
+        p6::Point2D{position.x + 0.03f, position.y + 0.03f},
+        p6::Point2D{position.x - 0.03f, position.y + 0.03f}
     );
+    if (position.x > areaSize)
+    {
+        position.x = -areaSize;
+    }
+    if (position.x < -areaSize)
+    {
+        position.x = areaSize;
+    }
+    if (position.y > areaSize)
+    {
+        position.y = -areaSize;
+    }
+    if (position.y < -areaSize)
+    {
+        position.y = areaSize;
+    }
 }

@@ -13,7 +13,7 @@ public:
 
     // Methods
     void update();
-    void draw(p6::Context& ctx);
+    void draw(p6::Context& ctx, float areaSize);
 
 private:
     glm::vec2 position;

@@ -1,11 +1,12 @@
 #include <cstdlib>
 #include <vector>
 #define DOCTEST_CONFIG_IMPLEMENT
+#include "boids.hpp"
 #include "doctest/doctest.h"
 #include "p6/p6.h"
-#include "boids.hpp"
 
 const int N = 100;
+const float areaSize = 0.8f;
 
 int main()
 {
@@ -20,14 +21,17 @@ int main()
 
     std::vector<Boid> boids;
 
-    for (int i = 0 ; i < N ; i++){
+    for (int i = 0; i < N; i++)
+    {
         boids.emplace_back(0.0f, 0.0f, 0.01f, 0.01f);
     }
     ctx.update = [&]() {
-        ctx.background(p6::NamedColor::Black);
-        for (Boid &b : boids){
+        ctx.background(p6::NamedColor::Red);
+        ctx.square(p6::Center(0.0f, 0.0f), p6::Radius(areaSize));
+        for (Boid& b : boids)
+        {
             b.update();
-            b.draw(ctx);
+            b.draw(ctx, areaSize);
         }
     };
     ctx.start();
