@@ -5,9 +5,10 @@
 
 class Boid {
 public:
-    // Constructor
+    
     glm::vec2 position;
 
+    // Constructor
     Boid(float x, float y, float vx, float vy);
 
     // Destructor
