@@ -9,11 +9,6 @@ Boid::Boid(float x, float y, float vx, float vy)
     velocity.y = vy;
 }
 
-// Destructor
-Boid::~Boid()
-{
-}
-
 // Methods
 void Boid::update()
 {
