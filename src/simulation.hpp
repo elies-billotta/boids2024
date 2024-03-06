@@ -11,7 +11,7 @@ public:
     std::vector<Boid> boids;
 
     // Constructor
-    Simulation(int N);
+    Simulation(int N, float areaSize);
 
     void simulate();
 
