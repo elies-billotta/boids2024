@@ -7,7 +7,6 @@
 
 class Simulation {
 public:
-    
     std::vector<Boid> boids;
 
     // Constructor
@@ -15,7 +14,7 @@ public:
 
     void simulate();
 
-private :
+private:
     void cohesion();
     void separation();
     void alignment();
