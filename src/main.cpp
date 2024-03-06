@@ -23,7 +23,7 @@ int main()
     int         currentItem = 0;
 
     std::vector<Boid> boids;
-    Simulation        simulation = Simulation(N);
+    Simulation        simulation = Simulation(N, areaSize);
     // std::string       text       = "Hello";
     ImVec4 namedColor = ImVec4(0.4f, 0.7f, 0.0f, 1.0f);
 

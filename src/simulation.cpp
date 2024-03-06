@@ -1,11 +1,13 @@
 #include "simulation.hpp"
 
 //Constructor
-Simulation::Simulation(int N) {
+Simulation::Simulation(int N, float areaSize) {
     this->boids = boids;
     for (int i = 0; i < N ; i++)
     {
-        this->boids.emplace_back(0.0f, 0.0f, 0.01f, 0.01f);
+        float x = areaSize * (2 * static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 1);
+        float y = areaSize * (2 * static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 1);
+        this->boids.emplace_back(x, y, 0.001f, 0.001f);
     }
 }
 
