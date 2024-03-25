@@ -14,7 +14,7 @@ public:
 
     // Methods
     void draw(p6::Context& ctx);
-    void simulate(float areaSize);
+    void simulate(float areaSize, bool check);
 
 private:
     void  cohesion();

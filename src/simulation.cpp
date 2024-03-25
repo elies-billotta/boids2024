@@ -22,13 +22,15 @@ void Simulation::draw(p6::Context& ctx)
     }
 }
 
-void Simulation::simulate(float areaSize)
+void Simulation::simulate(float areaSize, bool check)
 {
     for (Boid& b : this->boids)
     {
         b.move();
-        // b.noBounce(areaSize);
-        b.bounce(areaSize, m_size, m_strength);
+        if (check)
+            b.bounce(areaSize, m_size, m_strength);
+        else
+            b.noBounce(areaSize);
     }
     /*cohesion();
     separation();
