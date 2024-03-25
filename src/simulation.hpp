@@ -1,4 +1,5 @@
 #include <vector>
+#include "Strengths.hpp"
 #include "boids.hpp"
 #include "glm/fwd.hpp"
 #include "p6/p6.h"
@@ -10,16 +11,16 @@ public:
     std::vector<Boid> boids;
 
     // Constructor
-    Simulation(int N, float areaSize, float size, float strength);
+    Simulation(int N, float areaSize, float size);
 
     // Methods
     void draw(p6::Context& ctx);
     void simulate(float areaSize, bool check);
 
 private:
-    void  cohesion();
-    void  separation();
-    void  alignment();
-    float m_size;
-    float m_strength;
+    void      cohesion();
+    void      separation();
+    void      alignment();
+    float     m_sizeBoid;
+    Strengths m_strengths;
 };
