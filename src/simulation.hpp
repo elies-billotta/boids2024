@@ -10,12 +10,16 @@ public:
     std::vector<Boid> boids;
 
     // Constructor
-    Simulation(int N, float areaSize);
+    Simulation(int N, float areaSize, float size, float strength);
 
-    void simulate();
+    // Methods
+    void draw(p6::Context& ctx);
+    void simulate(float areaSize);
 
 private:
-    void cohesion();
-    void separation();
-    void alignment();
+    void  cohesion();
+    void  separation();
+    void  alignment();
+    float m_size;
+    float m_strength;
 };

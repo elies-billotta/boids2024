@@ -6,13 +6,18 @@
 class Boid {
 public:
     // Constructor
-    Boid(float x, float y, float vx, float vy);
+    Boid(float x, float y, float vx, float vy, float dx, float dy);
 
     // Methods
-    void update();
-    void draw(p6::Context& ctx, float areaSize);
+    void move();
+    void noBounce(float areaSize);
+    void bounce(float areaSize, const float& size, const float& strength);
+
+    // GETTERS
+    glm::vec2 getPosition();
 
 private:
-    glm::vec2 position;
-    glm::vec2 velocity;
+    glm::vec2 m_position;
+    glm::vec2 m_direction;
+    glm::vec2 m_velocity;
 };

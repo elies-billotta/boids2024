@@ -22,7 +22,7 @@ int main()
     int         currentItem = 0;
 
     std::vector<Boid> boids;
-    Simulation        simulation = Simulation(N, areaSize);
+    Simulation        simulation = Simulation(N, areaSize, 0.03f, 1.0f);
     ImVec4            namedColor = ImVec4(0.4f, 0.7f, 0.0f, 1.0f);
 
     ctx.imgui = [&]() {
@@ -35,11 +35,13 @@ int main()
     ctx.update = [&]() {
         ctx.background(p6::Color(namedColor.x, namedColor.y, namedColor.z, namedColor.w));
         ctx.square(p6::Center(0.0f, 0.0f), p6::Radius(areaSize));
-        for (Boid& b : simulation.boids)
+        simulation.simulate(areaSize);
+        simulation.draw(ctx);
+        /*for (Boid& b : simulation.boids)
         {
             b.update();
             b.draw(ctx, areaSize);
-        }
+        }*/
     };
     ctx.start();
 }
