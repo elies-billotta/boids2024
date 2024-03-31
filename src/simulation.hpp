@@ -17,10 +17,13 @@ public:
     void draw(p6::Context& ctx);
     void simulate(float areaSize, bool check);
 
+    // GETTERS
+    float* getSeparationStrength();
+
 private:
-    void      cohesion();
-    void      separation();
-    void      alignment();
+    void      separation(Boid& currentBoid, const float scope, const float strength);
     float     m_sizeBoid;
     Strengths m_strengths;
+    float     m_boidScope = 0.05f;
+    float     m_wallsScope;
 };

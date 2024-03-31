@@ -11,10 +11,14 @@ public:
     // Methods
     void move();
     void noBounce(float areaSize);
-    void bounce(float areaSize, const float& size, const float& strength);
+    void bounce(float& areaSize, const float& size, const float& strength, const float& scope);
 
     // GETTERS
     glm::vec2 getPosition();
+    glm::vec2 getDirection();
+
+    // SETTERS
+    glm::vec2 setDirection(glm::vec2 direction);
 
 private:
     glm::vec2 m_position;

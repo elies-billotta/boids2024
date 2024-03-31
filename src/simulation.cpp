@@ -17,7 +17,11 @@ void Simulation::draw(p6::Context& ctx)
 {
     for (Boid& b : this->boids)
     {
+        ctx.stroke = p6::Color{0.0f, 0.0f, 0.0f};
         ctx.circle(p6::Center(b.getPosition().x, b.getPosition().y), p6::Radius(m_sizeBoid));
+        // to see the scope of the boids
+        ctx.stroke = p6::Color{1.0f, 0.0f, 0.0f};
+        ctx.circle(p6::Center(b.getPosition().x, b.getPosition().y), p6::Radius(m_sizeBoid + m_boidScope));
     }
 }
 
@@ -27,9 +31,11 @@ void Simulation::simulate(float areaSize, bool check)
     {
         b.move();
         if (check)
-            b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength);
+            b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength, m_boidScope);
         else
             b.noBounce(areaSize);
+
+        separation(b, m_boidScope, m_strengths.separationStrength);
     }
     /*cohesion();
     separation();
@@ -38,17 +44,35 @@ void Simulation::simulate(float areaSize, bool check)
 
 // privates
 
-void Simulation::cohesion()
+void Simulation::separation(Boid& currentBoid, const float scope, const float strength)
 {
-    // TODO
+    glm::vec2 totalForce = {0., 0.};
+    int       neighbor   = 0;
+
+    for (Boid& b : this->boids)
+    {
+        if (&currentBoid == &b)
+            continue;
+
+        float distance = glm::distance(currentBoid.getPosition(), b.getPosition());
+        if (distance < scope)
+        {
+            totalForce += strength * (currentBoid.getPosition() - b.getPosition()) / distance;
+            neighbor++;
+        }
+    }
+
+    if (neighbor > 0)
+    {
+        glm::vec2 direction = currentBoid.getDirection();
+        totalForce /= static_cast<float>(neighbor);
+        currentBoid.setDirection(direction += totalForce);
+        currentBoid.setDirection(glm::normalize(currentBoid.getDirection()));
+    }
 }
 
-void Simulation::separation()
+// GETTERS
+float* Simulation::getSeparationStrength()
 {
-    // TODO
-}
-
-void Simulation::alignment()
-{
-    // TODO
+    return &m_strengths.separationStrength;
 }

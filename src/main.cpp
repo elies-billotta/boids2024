@@ -31,11 +31,13 @@ int main()
         ImGui::SliderFloat("Square size", &areaSize, 0.f, 1.f);
         ImGui::ColorPicker4("Color", (float*)&namedColor);
         ImGui::Checkbox("Bounce", &check);
+        ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 1.f);
         ImGui::Combo("##combo", &currentItem, items, IM_ARRAYSIZE(items));
         ImGui::End();
     };
     ctx.update = [&]() {
         ctx.background(p6::Color(namedColor.x, namedColor.y, namedColor.z, namedColor.w));
+        ctx.stroke = p6::Color{0.0f, 0.0f, 0.0f};
         ctx.square(p6::Center(0.0f, 0.0f), p6::Radius(areaSize));
         simulation.simulate(areaSize, check);
         simulation.draw(ctx);
