@@ -6,7 +6,7 @@
 #include "doctest/doctest.h"
 #include "simulation.hpp"
 
-const int N = 100;
+const int N = 50;
 
 int main()
 {
@@ -31,8 +31,9 @@ int main()
         ImGui::SliderFloat("Square size", &areaSize, 0.f, 1.f);
         ImGui::ColorPicker4("Color", (float*)&namedColor);
         ImGui::Checkbox("Bounce", &check);
-        ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 1.f);
-        ImGui::Combo("##combo", &currentItem, items, IM_ARRAYSIZE(items));
+        ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 0.5f);
+        ImGui::SliderFloat("Cohesion", simulation.getCohesionStrength(), 0.f, 0.5f);
+        ImGui::SliderFloat("Alignement", simulation.getAlignementStrength(), 0.f, 0.5f);
         ImGui::End();
     };
     ctx.update = [&]() {
@@ -41,11 +42,6 @@ int main()
         ctx.square(p6::Center(0.0f, 0.0f), p6::Radius(areaSize));
         simulation.simulate(areaSize, check);
         simulation.draw(ctx);
-        /*for (Boid& b : simulation.boids)
-        {
-            b.update();
-            b.draw(ctx, areaSize);
-        }*/
     };
     ctx.start();
 }

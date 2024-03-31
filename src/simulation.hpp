@@ -19,11 +19,16 @@ public:
 
     // GETTERS
     float* getSeparationStrength();
+    float* getCohesionStrength();
+    float* getAlignementStrength();
 
 private:
-    void      separation(Boid& currentBoid, const float scope, const float strength);
+    void separation(Boid& currentBoid, const float scope, const float strength);
+    // void      cohesion(Boid& currentBoid, const float scope, const float strength);
+    void      cohesion(Boid& currentBoid, const float scope, const float strength);
+    void      alignement(Boid& currentBoid, const float scope, const float strength);
     float     m_sizeBoid;
     Strengths m_strengths;
-    float     m_boidScope = 0.05f;
+    float     m_boidScope = 0.09f;
     float     m_wallsScope;
 };

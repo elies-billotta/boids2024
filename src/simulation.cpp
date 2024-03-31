@@ -36,10 +36,9 @@ void Simulation::simulate(float areaSize, bool check)
             b.noBounce(areaSize);
 
         separation(b, m_boidScope, m_strengths.separationStrength);
+        cohesion(b, m_boidScope, m_strengths.cohesionStrength);
+        alignement(b, m_boidScope, m_strengths.alignementStrength);
     }
-    /*cohesion();
-    separation();
-    alignment();*/
 }
 
 // privates
@@ -71,8 +70,72 @@ void Simulation::separation(Boid& currentBoid, const float scope, const float st
     }
 }
 
+void Simulation::cohesion(Boid& currentBoid, const float scope, const float strength)
+{
+    glm::vec2 averagePosition = {0.0, 0.0};
+    float     count           = 0;
+
+    for (Boid& b : this->boids)
+    {
+        if (&currentBoid == &b)
+            continue;
+
+        const float distance = glm::distance(currentBoid.getPosition(), b.getPosition());
+        if (distance < scope)
+        {
+            averagePosition += b.getPosition();
+            count++;
+        }
+    }
+    if (count > 0)
+    {
+        glm::vec2 direction = currentBoid.getDirection();
+        averagePosition /= count;
+        currentBoid.setDirection(direction += ((averagePosition - currentBoid.getPosition()) * strength));
+        currentBoid.setDirection(glm::normalize(currentBoid.getDirection()));
+    }
+}
+
+void Simulation::alignement(Boid& currentBoid, const float scope, const float strength)
+{
+    glm::vec2 averageDirection = {0.0, 0.0};
+    float     count            = 0;
+
+    for (Boid& b : this->boids)
+    {
+        if (&currentBoid == &b)
+            continue;
+
+        const float distance = glm::distance(currentBoid.getPosition(), b.getPosition());
+
+        if (distance < scope)
+        {
+            averageDirection += b.getDirection();
+            count++;
+        }
+    }
+
+    if (count > 0)
+    {
+        glm::vec2 direction = currentBoid.getDirection();
+        averageDirection /= count;
+        currentBoid.setDirection(direction += averageDirection * strength);
+        currentBoid.setDirection(glm::normalize(currentBoid.getDirection()));
+    }
+}
+
 // GETTERS
 float* Simulation::getSeparationStrength()
 {
     return &m_strengths.separationStrength;
+}
+
+float* Simulation::getCohesionStrength()
+{
+    return &m_strengths.cohesionStrength;
+}
+
+float* Simulation::getAlignementStrength()
+{
+    return &m_strengths.alignementStrength;
 }
