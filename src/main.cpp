@@ -10,8 +10,8 @@
 #include "../src-common/glimac/cone_vertices.hpp"
 #include "../src-common/glimac/default_shader.hpp"
 #include "../src-common/glimac/sphere_vertices.hpp"
-#include "alea/MarkovChain.hpp"
 #include "../src/render/light.hpp"
+#include "alea/MarkovChain.hpp"
 #include "alea/RandomVariableGenerator.hpp"
 #include "camera/camera.hpp"
 #include "doctest/doctest.h"
@@ -145,18 +145,18 @@ int       main()
     GLuint sparkBake1, sparkBake2;
     glGenTextures(1, &sparkBake1);
     glBindTexture(GL_TEXTURE_2D, sparkBake1);
-    glGenTextures(1, &sparkBake2);
-    glBindTexture(GL_TEXTURE_2D, sparkBake2);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark1.width(), imgSpark1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark1.data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    // Génération de la texture sparkBake2
+    glGenTextures(1, &sparkBake2);
+    glBindTexture(GL_TEXTURE_2D, sparkBake2);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark2.width(), imgSpark2.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark2.data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0); // Délier la texture
 
     // VBO
     player3D.setVbo();
@@ -232,9 +232,9 @@ int       main()
     glEnable(GL_DEPTH_TEST);
     glm::vec3 sparkMatrix = glm::vec3(0.0f, 0.0f, 0.0f);
     // Declare your infinite update loop.
-    int time   = 0;
+    int    time           = 0;
     GLuint currentTexture = sparkBake1;
-    ctx.update = [&]() {
+    ctx.update            = [&]() {
         /*********************************
          * RENDERING
          *********************************/
@@ -265,11 +265,10 @@ int       main()
             // Mettre à jour la texture et la direction des sparks en fonction de leur état
             if (sparkState == static_cast<int>(MarkovChainTextureState::Texture1))
             {
-                glBindTexture(GL_TEXTURE_2D, textureMap[sparkState]);
                 currentTexture = sparkBake1;
             }
-            else{
-                glBindTexture(GL_TEXTURE_2D, textureMap[sparkState]);
+            else
+            {
                 currentTexture = sparkBake2;
             }
             if (sparkState == static_cast<int>(MarkovChainDirection::Left))
@@ -281,7 +280,7 @@ int       main()
         }
         time++;
         spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);
-      
+
         // Dessiner chaque rocher à sa position respective
         for (auto rockPosition : rockPositions)
         {
@@ -298,7 +297,6 @@ int       main()
         cube.draw(posPlayer, glm::vec3{1}, shaderCube, viewMatrix, ProjMatrix);
 
         // std::cout << "x" << cube.getCubePosition().x << "y" << cube.getCubePosition().y << "z" << cube.getCubePosition().z << std::endl;
-
 
         /*glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
