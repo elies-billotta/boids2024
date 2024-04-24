@@ -24,9 +24,8 @@
 #include "simulation/boids.hpp"
 #include "simulation/simulation.hpp"
 
-const int       N     = 100;
-const float     speed = 0.01f;
-const glm::vec3 posPlayer(0., 0., 0.);
+const int   N     = 100;
+const float speed = 0.01f;
 // const glm::vec3 posCube(0., -5., -5.);
 
 int main()
@@ -44,8 +43,11 @@ int main()
     /*********************************
      * INITIALIZATION SIMULATION
      *********************************/
-    Cube       cube(20.0f, posPlayer);
-    Simulation simulation = Simulation(N, cube.getSize(), 0.03f, posPlayer);
+    Player player(glm::vec3(0.f, 0.f, 0.f));
+    Camera camera(player.getPosition());
+
+    Cube       cube(20.0f, player.getPosition());
+    Simulation simulation = Simulation(N, cube.getSize(), 0.03f, player.getPosition());
     ImVec4     namedColor = ImVec4(0.4f, 0.7f, 0.0f, 1.0f);
     bool       check      = false;
 
@@ -59,9 +61,6 @@ int main()
         ImGui::SliderFloat("Alignement", simulation.getAlignementStrength(), 0.f, 0.5f);
         ImGui::End();
     };
-
-    Player player(posPlayer);
-    Camera camera(posPlayer);
 
     /*********************************
      * 3D INITIALIZATION
@@ -158,7 +157,7 @@ int main()
     ProjMatrix = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
 
     /* *** LIGHTS *** */
-    Light lightSun = Light(glm::vec3(100.f));
+    Light lightPlayer = Light(glm::vec3(80.f));
 
     // RANDOM
     RandomVariableGenerator randGen;
@@ -204,7 +203,7 @@ int main()
         shader3D.use();
 
         std::cout << "PLayer position " << player.getPosition().x << " " << player.getPosition().y << " " << player.getPosition().z << std::endl;
-        lightSun.passToShader(shader3D, ProjMatrix, viewMatrix, player.getPosition());
+        lightPlayer.passToShader(shader3D, glm::vec3(148.0f / 255.0f, 203.0f / 255.0f, 246.0f / 255.0f), ProjMatrix, viewMatrix, glm::vec3(0.f));
 
         // Dessiner chaque rocher à sa position respective
         for (const auto& position : rockPositions)
@@ -219,7 +218,7 @@ int main()
         }
         shaderCube.use();
 
-        cube.draw(posPlayer, glm::vec3{1}, shaderCube, viewMatrix, ProjMatrix);
+        cube.draw(cube.getPosition(), glm::vec3{1}, shaderCube, viewMatrix, ProjMatrix);
 
         /*glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
