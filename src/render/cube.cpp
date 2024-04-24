@@ -25,9 +25,9 @@ void Cube::textures(img::Image& img_load)
 void Cube::vectors()
 {
     // Calculer les coordonnées des sommets
-    float x = m_size / 4.7f;
-    float y = m_size / 3.0f;
-    float z = m_size / 4.0f;
+    float x = m_size / 5.f;
+    float y = m_size / 5.f;
+    float z = m_size / 5.f;
 
     vertices = {
         // Face avant

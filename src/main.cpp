@@ -10,7 +10,6 @@
 #include "../src-common/glimac/cone_vertices.hpp"
 #include "../src-common/glimac/default_shader.hpp"
 #include "../src-common/glimac/sphere_vertices.hpp"
-#include "boids.hpp"
 #include "camera/camera.hpp"
 #include "doctest/doctest.h"
 #include "glm/fwd.hpp"
@@ -21,14 +20,33 @@
 #include "render/light.hpp"
 #include "render/model.hpp"
 #include "render/program.hpp"
-#include "simulation.hpp"
+#include "simulation/boids.hpp"
+#include "simulation/simulation.hpp"
 
-const int       N     = 50;
+const int       N     = 1;
 const float     speed = 0.01f;
 const glm::vec3 posPlayer(0., 0., -10.);
 
-/*void moveListener(const p6::Context& ctx, Camera& camera)
-{*/
+void moveListener(const p6::Context& ctx, Player& player, Camera& camera)
+{
+    if (ctx.key_is_pressed(GLFW_KEY_W) || ctx.key_is_pressed(GLFW_KEY_UP))
+    {
+        player.moveFront(speed);
+    }
+    if (ctx.key_is_pressed(GLFW_KEY_S) || ctx.key_is_pressed(GLFW_KEY_DOWN))
+    {
+        player.moveFront(-speed);
+    }
+    if (ctx.key_is_pressed(GLFW_KEY_A) || ctx.key_is_pressed(GLFW_KEY_LEFT))
+    {
+        player.moveLeft(speed);
+    }
+    if (ctx.key_is_pressed(GLFW_KEY_D) || ctx.key_is_pressed(GLFW_KEY_RIGHT))
+    {
+        player.moveLeft(-speed);
+    }
+    camera.setPosition(player.getPosition());
+};
 
 int main()
 {
@@ -44,22 +62,22 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     /*********************************
-     * INITIALIZATION
+     * INITIALIZATION SIMULATION
      *********************************/
 
-    std::vector<Boid> boids;
-    Simulation        simulation = Simulation(N, areaSize, 0.03f);
-    ImVec4            namedColor = ImVec4(0.4f, 0.7f, 0.0f, 1.0f);
-    bool              check      = false;
+    // std::vector<Boid> boids;
+    Simulation simulation = Simulation(N, areaSize, 0.03f);
+    ImVec4     namedColor = ImVec4(0.4f, 0.7f, 0.0f, 1.0f);
+    bool       check      = false;
 
     ctx.imgui = [&]() {
         ImGui::Begin("Test");
         ImGui::SliderFloat("Square size", &areaSize, 0.f, 1.f);
         ImGui::ColorPicker4("Color", (float*)&namedColor);
         ImGui::Checkbox("Bounce", &check);
-        ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 0.5f);
+        /*ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 0.5f);
         ImGui::SliderFloat("Cohesion", simulation.getCohesionStrength(), 0.f, 0.5f);
-        ImGui::SliderFloat("Alignement", simulation.getAlignementStrength(), 0.f, 0.5f);
+        ImGui::SliderFloat("Alignement", simulation.getAlignementStrength(), 0.f, 0.5f);*/
         ImGui::End();
     };
 
@@ -83,6 +101,7 @@ int main()
     img::Image Texture   = p6::load_image_buffer("../assets/texture/background.png");
     img::Image imgPlayer = p6::load_image_buffer("../assets/texture/player.png");
     img::Image img_ile   = p6::load_image_buffer("../assets/texture/player.png");
+    img::Image imgBoid   = p6::load_image_buffer("../assets/texture/boid.jpg");
 
     // UNIFORM VARIABLE
     ShaderPoint.addUniformVariable("uMVPMatrix");
@@ -103,10 +122,12 @@ int main()
     shaderCube.addUniformVariable("uNormalMatrix");
 
     // 3D MODEL
-    Model ile = Model();
+    Model ile     = Model();
+    Model boids3D = Model();
 
     // LOAD 3D MODEL
     ile.loadModel("player.obj");
+    boids3D.loadModel("player.obj");
 
     // TEXTURES
     /*GLuint playerTexture;
@@ -128,11 +149,22 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    GLuint boidBake;
+    glGenTextures(1, &boidBake);
+    glBindTexture(GL_TEXTURE_2D, boidBake);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgBoid.width(), imgBoid.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBoid.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     // VBO
     ile.setVbo();
+    boids3D.setVbo();
 
     // VAO
     ile.setVao();
+    boids3D.setVao();
 
     // CUBE
     Cube cube(5.0f);
@@ -146,7 +178,7 @@ int main()
     ProjMatrix = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
 
     // LIGHTS
-    Light lightScene = Light(glm::vec3{100.});
+    Light lightScene = Light(glm::vec3{50.});
     Light lightPerso = Light(glm::vec3{0.0001});
 
     glEnable(GL_DEPTH_TEST);
@@ -156,31 +188,12 @@ int main()
         /*********************************
          * RENDERING
          *********************************/
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // glBindVertexArray(vao);
 
         /* *** MOVING PLAYER *** */
-        if (ctx.key_is_pressed(GLFW_KEY_W) || ctx.key_is_pressed(GLFW_KEY_UP))
-        {
-            player.moveFront(speed);
-        }
-        if (ctx.key_is_pressed(GLFW_KEY_S) || ctx.key_is_pressed(GLFW_KEY_DOWN))
-        {
-            player.moveFront(-speed);
-        }
-        if (ctx.key_is_pressed(GLFW_KEY_A) || ctx.key_is_pressed(GLFW_KEY_LEFT))
-        {
-            player.moveLeft(speed);
-        }
-        if (ctx.key_is_pressed(GLFW_KEY_D) || ctx.key_is_pressed(GLFW_KEY_RIGHT))
-        {
-            player.moveLeft(-speed);
-        }
+        moveListener(ctx, player, camera);
 
-        camera.setPosition(player.getPosition());
-
-        std::cout << "Camera position: " << camera.getPosition().x << " " << camera.getPosition().y << " " << camera.getPosition().z << std::endl;
+        // std::cout << "Camera position: " << camera.getPosition().x << " " << camera.getPosition().y << " " << camera.getPosition().z << std::endl;
 
         glm::mat4 viewMatrix = camera.getViewMatrix();
         ShaderPoint.use();
@@ -221,6 +234,16 @@ int main()
         // std::cout << player.getPosition().z << std::endl;
 
         ile.draw(player.getPosition(), glm::vec3{1.}, -100, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, ShaderPoint, ileBake);
+
+        std::cout << "taille des boids" + simulation.getBoids().size() << std::endl;
+
+        for (Boid& b : simulation.getBoids())
+        {
+            int i = 0;
+            i++;
+            std::cout << i << std::endl;
+            boids3D.draw(b.getPosition(), glm::vec3{1.}, -100, glm::vec3(1.f), ProjMatrix, viewMatrix, ShaderPoint, boidBake);
+        }
 
         shaderCube.use();
         cube.draw(glm::vec3(0., -5., -5.), glm::vec3{5.}, shaderCube, viewMatrix, ProjMatrix);
