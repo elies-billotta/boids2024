@@ -10,15 +10,15 @@ public:
 
     // Methods
     void move();
-    /*void noBounce(float areaSize);
-    void bounce(float& areaSize, const float& size, const float& strength, const float& scope);*/
+    void noBounce(float areaSize, glm::vec3 positionCube);
+    void bounce(float& areaSize, const float& size, const float& strength, const float& scope);
 
     // GETTERS
     glm::vec3 getPosition();
-    glm::vec3 getDirection();
+    /*glm::vec3 getDirection();
 
     // SETTERS
-    glm::vec3 setDirection(glm::vec3 direction);
+    glm::vec3 setDirection(glm::vec3 direction);*/
 
 private:
     glm::vec3 m_position;

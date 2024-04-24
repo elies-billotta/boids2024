@@ -14,15 +14,15 @@ void Boid::move()
     m_position.z += m_direction.z * m_velocity.z;
 }
 
-/*void Boid::noBounce(float areaSize)
+void Boid::noBounce(float areaSize, glm::vec3 positionCube)
 {
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
-        if (m_position[i] > areaSize)
+        if (m_position[i] > areaSize + positionCube[i])
         {
             m_position[i] = -areaSize;
         }
-        if (m_position[i] < -areaSize)
+        if (m_position[i] < -areaSize + positionCube[i])
         {
             m_position[i] = areaSize;
         }
@@ -30,7 +30,7 @@ void Boid::move()
 }
 
 // The boids bounce against the walls
-void Boid::bounce(float& areaSize, const float& size, const float& strength, const float& scope)
+void Boid::bounce(float& areaSize, const float& size, const float& strength, const float& scope, glm::vec3 positionCube)
 {
     glm::vec2   boundsForce = {0., 0.};
     const float maxX        = areaSize;
@@ -38,6 +38,7 @@ void Boid::bounce(float& areaSize, const float& size, const float& strength, con
     const float minX        = -areaSize;
     const float minY        = -areaSize;
 
+    // il faudra rajouter -size quand on aura la taille des boids
     if (m_position.x > areaSize - size - scope)
     {
         boundsForce.x = -glm::distance(m_position.x, maxX) * (m_position.x / maxX);
@@ -58,7 +59,6 @@ void Boid::bounce(float& areaSize, const float& size, const float& strength, con
     m_direction += boundsForce * strength;
     m_direction = glm::normalize(m_direction);
 }
-*/
 
 // GETTERS
 glm::vec3 Boid::getPosition()

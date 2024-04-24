@@ -23,7 +23,7 @@
 #include "simulation/boids.hpp"
 #include "simulation/simulation.hpp"
 
-const int       N     = 10;
+const int       N     = 50;
 const float     speed = 0.01f;
 const glm::vec3 posPlayer(0., 0., 0.);
 const glm::vec3 posCube(0., -5., -5.);

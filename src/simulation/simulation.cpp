@@ -4,7 +4,8 @@
 Simulation::Simulation(int N, float areaSize, float size, glm::vec3 positionCube)
 {
     glm::vec3 position = {0., 1., -10.};
-    glm::vec3 velocity = {0.01f, 0.01f, 0.01f};
+    glm::vec3 velocity = {1.f, 1.f, 1.f};
+    velocity *= 0.1f;
 
     for (int i = 0; i < N; i++)
     {
@@ -20,7 +21,8 @@ Simulation::Simulation(int N, float areaSize, float size, glm::vec3 positionCube
         // float z = p6::random::number(-m_squareSize.z + m_size, m_squareSize.z - m_size);
 
         this->m_boids.emplace_back(position, velocity, direction);
-        m_sizeBoid = size;
+        m_sizeBoid     = size;
+        m_positionCube = positionCube;
     }
 }
 
@@ -41,14 +43,15 @@ void Simulation::simulate(float areaSize, bool check)
     for (Boid& b : this->m_boids)
     {
         b.move();
-        /*if (check)
+        if (check)
             b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength, m_boidScope);
         else
-            b.noBounce(areaSize);
+            b.noBounce(areaSize, m_positionCube);
 
-        separation(b, m_boidScope, m_strengths.separationStrength);
+        /*separation(b, m_boidScope, m_strengths.separationStrength);
         cohesion(b, m_boidScope, m_strengths.cohesionStrength);
-        alignement(b, m_boidScope, m_strengths.alignementStrength);*/
+        alignement(b, m_boidScope, m_strengths.alignementStrength);
+        */
     }
 }
 
