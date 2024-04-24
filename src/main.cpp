@@ -29,8 +29,9 @@ const int       N     = 100;
 const float     speed = 0.01f;
 const glm::vec3 posPlayer(0., 0., 0.);
 // const glm::vec3 posCube(0., -5., -5.);
-const int timer = 30;
-int       main()
+const int    timer  = 30;
+const double lambda = 0.1;
+int          main()
 {
     // Run the tests
     if (doctest::Context{}.run() != 0)
@@ -180,11 +181,11 @@ int       main()
 
     ProjMatrix = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
 
-    /* *** LIGHTS *** */
-    Light lightSun = Light(glm::vec3(100.f));
-
     // RANDOM
     RandomVariableGenerator randGen;
+
+    /* *** LIGHTS *** */
+    Light lightSun = Light(glm::vec3(randGen.exponential(lambda)));
 
     // ROCKS
     float rockSize;
@@ -210,9 +211,9 @@ int       main()
     // MARKOV CHAIN
     // Créer une matrice de transition pour gérer les changements d'état entre "Texture1" et "Texture2"
     std::vector<std::vector<double>> transitionMatrix = {
-        {0.8, 0.2, 0.0, 0.0}, // Probabilités de transition de l'état 0 vers les autres états
-        {0.2, 0.3, 0.0, 0.0}, // Probabilités de transition de l'état 1 vers les autres états
-        {0.0, 0.1, 0.3, 0.0}, // Probabilités de transition de l'état 2 vers les autres états
+        {0.8, 0.2, 0.9, 0.0}, // Probabilités de transition de l'état 0 vers les autres états
+        {0.2, 0.0, 0.0, 0.0}, // Probabilités de transition de l'état 1 vers les autres états
+        {0.0, 0.0, 0.3, 0.0}, // Probabilités de transition de l'état 2 vers les autres états
         {0.0, 0.4, 0.2, 0.8}  // Probabilités de transition de l'état 3 vers les autres états
     };
 
@@ -250,7 +251,6 @@ int       main()
 
         /* *** LIGHT *** */
         shader3D.use();
-
         std::cout << "PLayer position " << player.getPosition().x << " " << player.getPosition().y << " " << player.getPosition().z << std::endl;
         lightSun.passToShader(shader3D, ProjMatrix, viewMatrix, player.getPosition());
 
@@ -261,6 +261,7 @@ int       main()
 
         if (time >= timer)
         {
+            lightSun = Light(glm::vec3(randGen.exponential(lambda)));
             time = 0;
             // Mettre à jour la texture et la direction des sparks en fonction de leur état
             if (sparkState == static_cast<int>(MarkovChainTextureState::Texture1))
