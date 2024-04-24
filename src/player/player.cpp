@@ -1,46 +1,21 @@
 #include "../src/player/player.hpp"
-#include <p6/p6.h>
-#include <vector>
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/fwd.hpp"
-#include "glm/trigonometric.hpp"
 
-/*void Player::setPosition(glm::vec3 posPlayer)
+/*float Player::getRotationAngle() const
 {
-    m_Position = posPlayer;
-}
-*/
-/*
-glm::vec3 Player::getPosition()
-{
- return m_Position;
-}
-
-float Player::getRotationAngle() const
-{
- return m_RotationAngle; // Remplacez m_RotationAngle par la variable ou la valeur appropriée contenant l'angle de rotation de votre modèle
+    return m_RotationAngle; // Remplacez m_RotationAngle par la variable ou la valeur appropriée contenant l'angle de rotation de votre modèle
 }
 
 void Player::setRotationAngle(float rotationAngle)
 {
- m_RotationAngle = rotationAngle; // Remplacez m_RotationAngle par la variable ou la valeur appropriée contenant l'angle de rotation de votre modèle
-}*/
+    m_RotationAngle = rotationAngle; // Remplacez m_RotationAngle par la variable ou la valeur appropriée contenant l'angle de rotation de votre modèle
+}
+*/
 
 Player::Player(glm::vec3 pos)
     : m_pos(pos), m_Phi(p6::PI), m_Theta(0.)
 {
     this->computeDirectionVectors();
 };
-
-void Player::moveFront(float speed)
-{
-    m_pos += speed * m_FrontVector;
-}
-
-void Player::moveLeft(float speed)
-{
-    m_pos += speed * m_LeftVector;
-}
 
 void Player::computeDirectionVectors()
 {
@@ -50,6 +25,51 @@ void Player::computeDirectionVectors()
 
     m_UpVector = glm::cross(m_FrontVector, m_LeftVector);
 }
+
+bool verifBorder(glm::vec3 position, Cube& cube)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        if (position[i] > cube.getCubePosition()[i])
+        {
+            return false;
+        }
+        if (position[i] < -cube.getCubePosition()[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void Player::move(const p6::Context& ctx, Player& player, Camera& camera, Cube& cube)
+{
+    glm::vec3 savePos = m_pos;
+
+    if (ctx.key_is_pressed(GLFW_KEY_W) || ctx.key_is_pressed(GLFW_KEY_UP))
+    {
+        savePos += m_speed * m_FrontVector;
+    }
+    if (ctx.key_is_pressed(GLFW_KEY_S) || ctx.key_is_pressed(GLFW_KEY_DOWN))
+    {
+        savePos += -m_speed * m_FrontVector;
+    }
+
+    if (ctx.key_is_pressed(GLFW_KEY_A) || ctx.key_is_pressed(GLFW_KEY_LEFT))
+    {
+        savePos += m_speed * m_LeftVector;
+    }
+    if (ctx.key_is_pressed(GLFW_KEY_D) || ctx.key_is_pressed(GLFW_KEY_RIGHT))
+    {
+        savePos += -m_speed * m_LeftVector;
+    }
+
+    if (verifBorder(savePos, cube))
+        m_pos = savePos;
+
+    camera.setPosition(savePos);
+};
 
 /* *** GETTERS *** */
 glm::vec3 Player::getPosition()

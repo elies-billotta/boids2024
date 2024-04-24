@@ -14,13 +14,14 @@ private:
     std::vector<float>  vertices;
     std::vector<GLuint> indices;
     GLuint              vao, vbo, ibo;
+    glm::vec3           m_position;
     float               m_size;
     GLuint              texture;
 
 public:
     /// \brief param constructor of the cube around the scene
     /// \param size the size of the cube
-    explicit Cube(float size);
+    Cube(float size, glm::vec3 position);
 
     ///\brief cube destructor
     ~Cube() = default;
@@ -50,4 +51,9 @@ public:
     ///\param viewMatrix The view matrix for the scene.
     ///\param ProjMatrix The projection matrix for the scene.
     void draw(glm::vec3 pos, glm::vec3 scale, Program& program, glm::mat4 viewMatrix, glm::mat4 ProjMatrix) const;
+
+    /* *** GETTERS *** */
+    float     getSize();
+    glm::vec3 getPosition();
+    glm::vec3 getCubePosition();
 };

@@ -1,8 +1,8 @@
 #include "boids.hpp"
 
 // Constructor
-Boid::Boid(glm::vec3 position, glm::vec3 velocity, glm::vec3 direction)
-    : m_position(position), m_velocity(velocity), m_direction(direction)
+Boid::Boid(glm::vec3 position, glm::vec3 velocity, glm::vec3 direction, float randomAngle)
+    : m_position(position), m_velocity(velocity), m_direction(direction), m_angle(randomAngle)
 {
 }
 
@@ -83,6 +83,11 @@ glm::vec3 Boid::getPosition()
 glm::vec3 Boid::getDirection()
 {
     return m_direction;
+}
+
+float Boid::getAngle()
+{
+    return m_angle;
 }
 
 // SETTERS

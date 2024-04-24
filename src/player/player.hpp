@@ -1,11 +1,17 @@
 #pragma once
 
+#include <p6/p6.h>
 #include <glm/glm.hpp>
+#include <vector>
 #include "../src-common/glimac/sphere_vertices.hpp"
+#include "../src/camera/camera.hpp"
+#include "../src/render/cube.hpp"
 #include "../src/render/model.hpp"
 #include "../src/render/program.hpp"
+#include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/trigonometric.hpp"
 #include "p6/p6.h"
 
 class Player {
@@ -19,10 +25,7 @@ public:
     /// \param phi The initial phi angle (rotation around the y-axis) of the player's orientation
     /// \param theta The initial theta angle (rotation around the x-axis) of the player's orientation
     Player(glm::vec3 pos);
-
-    void moveFront(float speed);
-
-    void moveLeft(float speed);
+    void move(const p6::Context& ctx, Player& player, Camera& camera, Cube& cube);
 
     ///\brief destructor of the player
     /*~Player() = default;
@@ -76,12 +79,15 @@ private:
     float     m_Phi;   // coord spherique de F
     float     m_Theta; // coord spherique de F
     // float     m_RotationAngle;
+    float m_speed = 0.1f;
 
     glm::vec3 m_FrontVector;
     glm::vec3 m_LeftVector;
     glm::vec3 m_UpVector;
 
     void computeDirectionVectors();
+    void moveFront(float speed);
+    void moveLeft(float speed);
 };
 
 ///\brief Handles camera options based on user input, such as player movement and rotation

@@ -4,23 +4,21 @@
 Simulation::Simulation(int N, float areaSize, float size, glm::vec3 positionCube)
 {
     glm::vec3 position = {0., 1., -10.};
-    glm::vec3 velocity = {1.f, 1.f, 1.f};
+    glm::vec3 velocity = {0.5f, 0.5f, 0.2f};
     velocity *= 0.1f;
 
     for (int i = 0; i < N; i++)
     {
         glm::vec3 direction = {p6::random::direction(), 1.};
-        /*float x = areaSize * (2 * static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1);
-        float y = areaSize * (2 * static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1);*/
-        float x = p6::random::number(-areaSize + positionCube.x, areaSize + positionCube.x);
-        float y = p6::random::number(-areaSize + positionCube.y, areaSize + positionCube.y);
-        float z = p6::random::number(-areaSize + positionCube.z, areaSize + positionCube.z);
+
+        float x           = p6::random::number(-areaSize + positionCube.x, areaSize + positionCube.x);
+        float y           = p6::random::number(-areaSize + positionCube.y, areaSize + positionCube.y);
+        float z           = p6::random::number(-areaSize + positionCube.z, areaSize + positionCube.z);
+        float randomAngle = p6::random::number(0, 360);
 
         position = {x, y, z};
 
-        // float z = p6::random::number(-m_squareSize.z + m_size, m_squareSize.z - m_size);
-
-        this->m_boids.emplace_back(position, velocity, direction);
+        this->m_boids.emplace_back(position, velocity, direction, randomAngle);
         m_sizeBoid     = size;
         m_positionCube = positionCube;
     }

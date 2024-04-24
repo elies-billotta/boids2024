@@ -2,8 +2,8 @@
 // #include "../src/game/include/player.hpp"
 #include "../src/render/program.hpp"
 
-Cube::Cube(float size)
-    : m_size(size), texture(0)
+Cube::Cube(float size, glm::vec3 position)
+    : m_size(size), texture(0), m_position(position)
 {
 }
 
@@ -234,6 +234,22 @@ void Cube::draw(glm::vec3 pos, glm::vec3 scale, Program& program, glm::mat4 view
     glBindVertexArray(vao);
     glBindTexture(GL_TEXTURE_2D, texture);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+}
+
+/* *** GETTERS *** */
+float Cube::getSize()
+{
+    return m_size;
+}
+
+glm::vec3 Cube::getPosition()
+{
+    return m_position;
+}
+
+glm::vec3 Cube::getCubePosition()
+{
+    return m_position + glm::vec3(m_size, m_size, m_size);
 }
 
 /*void Cube::borders(Player& player)
