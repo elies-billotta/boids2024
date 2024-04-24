@@ -9,8 +9,8 @@ public:
     Boid(glm::vec3 position, glm::vec3 velocity, glm::vec3 direction);
 
     // Methods
-    /*void move();
-    void noBounce(float areaSize);
+    void move();
+    /*void noBounce(float areaSize);
     void bounce(float& areaSize, const float& size, const float& strength, const float& scope);*/
 
     // GETTERS

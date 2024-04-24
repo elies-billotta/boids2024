@@ -23,9 +23,11 @@
 #include "simulation/boids.hpp"
 #include "simulation/simulation.hpp"
 
-const int       N     = 1;
+const int       N     = 10;
 const float     speed = 0.01f;
-const glm::vec3 posPlayer(0., 0., -10.);
+const glm::vec3 posPlayer(0., 0., 0.);
+const glm::vec3 posCube(0., -5., -5.);
+const float     areaSize = 20.f;
 
 void moveListener(const p6::Context& ctx, Player& player, Camera& camera)
 {
@@ -50,7 +52,6 @@ void moveListener(const p6::Context& ctx, Player& player, Camera& camera)
 
 int main()
 {
-    auto areaSize = 0.8f;
     // Run the tests
     if (doctest::Context{}.run() != 0)
         return EXIT_FAILURE;
@@ -66,13 +67,13 @@ int main()
      *********************************/
 
     // std::vector<Boid> boids;
-    Simulation simulation = Simulation(N, areaSize, 0.03f);
+    Simulation simulation = Simulation(N, areaSize, 0.03f, posPlayer);
     ImVec4     namedColor = ImVec4(0.4f, 0.7f, 0.0f, 1.0f);
     bool       check      = false;
 
     ctx.imgui = [&]() {
         ImGui::Begin("Test");
-        ImGui::SliderFloat("Square size", &areaSize, 0.f, 1.f);
+        // ImGui::SliderFloat("Square size", &areaSize, 0.f, 1.f);
         ImGui::ColorPicker4("Color", (float*)&namedColor);
         ImGui::Checkbox("Bounce", &check);
         /*ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 0.5f);
@@ -167,7 +168,7 @@ int main()
     boids3D.setVao();
 
     // CUBE
-    Cube cube(5.0f);
+    Cube cube(areaSize);
     cube.init(Texture);
 
     /* MATRIX FOR SHADERS*/
@@ -190,8 +191,9 @@ int main()
          *********************************/
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        /* *** MOVING PLAYER *** */
+        /* *** MOVING PLAYER & BOIDS *** */
         moveListener(ctx, player, camera);
+        simulation.simulate(areaSize, true);
 
         // std::cout << "Camera position: " << camera.getPosition().x << " " << camera.getPosition().y << " " << camera.getPosition().z << std::endl;
 
@@ -246,7 +248,7 @@ int main()
         }
 
         shaderCube.use();
-        cube.draw(glm::vec3(0., -5., -5.), glm::vec3{5.}, shaderCube, viewMatrix, ProjMatrix);
+        cube.draw(posPlayer, glm::vec3{1}, shaderCube, viewMatrix, ProjMatrix);
 
         /*glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 

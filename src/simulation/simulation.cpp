@@ -1,16 +1,24 @@
 #include "simulation.hpp"
 
 // Constructor
-Simulation::Simulation(int N, float areaSize, float size)
+Simulation::Simulation(int N, float areaSize, float size, glm::vec3 positionCube)
 {
-    glm::vec3 position  = {0., 1., -10.};
-    glm::vec3 velocity  = {0.f, 0.f, 0.f};
-    glm::vec3 direction = {0.f, 0.f, 0.f};
+    glm::vec3 position = {0., 1., -10.};
+    glm::vec3 velocity = {0.01f, 0.01f, 0.01f};
 
     for (int i = 0; i < N; i++)
     {
+        glm::vec3 direction = {p6::random::direction(), 1.};
         /*float x = areaSize * (2 * static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1);
         float y = areaSize * (2 * static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1);*/
+        float x = p6::random::number(-areaSize + positionCube.x, areaSize + positionCube.x);
+        float y = p6::random::number(-areaSize + positionCube.y, areaSize + positionCube.y);
+        float z = p6::random::number(-areaSize + positionCube.z, areaSize + positionCube.z);
+
+        position = {x, y, z};
+
+        // float z = p6::random::number(-m_squareSize.z + m_size, m_squareSize.z - m_size);
+
         this->m_boids.emplace_back(position, velocity, direction);
         m_sizeBoid = size;
     }
@@ -28,19 +36,19 @@ void Simulation::draw(p6::Context& ctx)
     }
 }
 
-/*void Simulation::simulate(float areaSize, bool check)
+void Simulation::simulate(float areaSize, bool check)
 {
-    for (Boid& b : this->boids)
+    for (Boid& b : this->m_boids)
     {
         b.move();
-        if (check)
+        /*if (check)
             b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength, m_boidScope);
         else
             b.noBounce(areaSize);
 
         separation(b, m_boidScope, m_strengths.separationStrength);
         cohesion(b, m_boidScope, m_strengths.cohesionStrength);
-        alignement(b, m_boidScope, m_strengths.alignementStrength);
+        alignement(b, m_boidScope, m_strengths.alignementStrength);*/
     }
 }
 

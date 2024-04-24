@@ -7,13 +7,14 @@ Boid::Boid(glm::vec3 position, glm::vec3 velocity, glm::vec3 direction)
 }
 
 // Methods
-/*void Boid::move()
+void Boid::move()
 {
     m_position.x += m_direction.x * m_velocity.x;
     m_position.y += m_direction.y * m_velocity.y;
+    m_position.z += m_direction.z * m_velocity.z;
 }
 
-void Boid::noBounce(float areaSize)
+/*void Boid::noBounce(float areaSize)
 {
     for (int i = 0; i < 2; i++)
     {
@@ -56,7 +57,8 @@ void Boid::bounce(float& areaSize, const float& size, const float& strength, con
 
     m_direction += boundsForce * strength;
     m_direction = glm::normalize(m_direction);
-}*/
+}
+*/
 
 // GETTERS
 glm::vec3 Boid::getPosition()
@@ -64,7 +66,7 @@ glm::vec3 Boid::getPosition()
     return m_position;
 }
 
-glm::vec3 Boid::getDirection()
+/*glm::vec3 Boid::getDirection()
 {
     return m_direction;
 }
@@ -74,3 +76,4 @@ glm::vec3 Boid::setDirection(glm::vec3 direction)
 {
     m_direction = direction;
 }
+*/

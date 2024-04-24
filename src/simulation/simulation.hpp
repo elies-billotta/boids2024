@@ -9,11 +9,11 @@
 class Simulation {
 public:
     // Constructor
-    Simulation(int N, float areaSize, float size);
+    Simulation(int N, float areaSize, float size, glm::vec3 positionCube);
 
     // Methods
     void draw(p6::Context& ctx);
-    // void simulate(float areaSize, bool check);
+    void simulate(float areaSize, bool check);
 
     // GETTERS
     std::vector<Boid> getBoids();

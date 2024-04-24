@@ -25,11 +25,11 @@ void Cube::textures(img::Image& img_load)
 void Cube::vectors()
 {
     // Calculer les coordonnées des sommets
-    float x = m_size / 5.f;
+    /*float x = m_size / 5.f;
     float y = m_size / 5.f;
-    float z = m_size / 5.f;
+    float z = m_size / 5.f;*/
 
-    vertices = {
+    /*vertices = {
         // Face avant
         -x, -y + 1, -z, // 0
         x, -y + 1, -z,  // 1
@@ -65,6 +65,44 @@ void Cube::vectors()
         x, -y + 1, -z,  // 21
         x, -y + 1, z,   // 22
         -x, -y + 1, z   // 23
+    };*/
+
+    vertices = {
+        // Face avant
+        -m_size, -m_size, -m_size, // 0
+        m_size, -m_size, -m_size,  // 1
+        m_size, m_size, -m_size,   // 2
+        -m_size, m_size, -m_size,  // 3
+
+        // Face arrière
+        m_size, -m_size, m_size,  // 4
+        -m_size, -m_size, m_size, // 5
+        -m_size, m_size, m_size,  // 6
+        m_size, m_size, m_size,   // 7
+
+        // Face gauche
+        -m_size, -m_size, m_size,  // 8
+        -m_size, -m_size, -m_size, // 9
+        -m_size, m_size, -m_size,  // 10
+        -m_size, m_size, m_size,   // 11
+
+        // Face droite
+        m_size, -m_size, -m_size, // 12
+        m_size, -m_size, m_size,  // 13
+        m_size, m_size, m_size,   // 14
+        m_size, m_size, -m_size,  // 15
+
+        // Face supérieure
+        -m_size, m_size, -m_size, // 16
+        m_size, m_size, -m_size,  // 17
+        m_size, m_size, m_size,   // 18
+        -m_size, m_size, m_size,  // 19
+
+        // Face inférieure
+        -m_size, -m_size, -m_size, // 20
+        m_size, -m_size, -m_size,  // 21
+        m_size, -m_size, m_size,   // 22
+        -m_size, -m_size, m_size   // 23
     };
 
     std::vector<float> textureCoords = {
