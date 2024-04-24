@@ -10,6 +10,7 @@
 #include "../src-common/glimac/cone_vertices.hpp"
 #include "../src-common/glimac/default_shader.hpp"
 #include "../src-common/glimac/sphere_vertices.hpp"
+#include "alea/RandomVariableGenerator.hpp"
 #include "camera/camera.hpp"
 #include "doctest/doctest.h"
 #include "glm/fwd.hpp"
@@ -102,6 +103,7 @@ int main()
     img::Image imgPlayer = p6::load_image_buffer("../assets/texture/player.png");
     img::Image img_ile   = p6::load_image_buffer("../assets/texture/player.png");
     img::Image imgBoid   = p6::load_image_buffer("../assets/texture/boid.jpg");
+    img::Image imgRock   = p6::load_image_buffer("../assets/texture/rock.png");
 
     // UNIFORM VARIABLE
     ShaderPoint.addUniformVariable("uMVPMatrix");
@@ -124,10 +126,12 @@ int main()
     // 3D MODEL
     Model ile     = Model();
     Model boids3D = Model();
+    Model rock    = Model();
 
     // LOAD 3D MODEL
     ile.loadModel("player.obj");
     boids3D.loadModel("player.obj");
+    rock.loadModel("rock.obj");
 
     // TEXTURES
     /*GLuint playerTexture;
@@ -158,13 +162,24 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    GLuint rockBake;
+    glGenTextures(1, &rockBake);
+    glBindTexture(GL_TEXTURE_2D, rockBake);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgRock.width(), imgRock.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgRock.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     // VBO
     ile.setVbo();
     boids3D.setVbo();
+    rock.setVbo();
 
     // VAO
     ile.setVao();
     boids3D.setVao();
+    rock.setVao();
 
     // CUBE
     Cube cube(5.0f);
@@ -179,7 +194,34 @@ int main()
 
     // LIGHTS
     Light lightScene = Light(glm::vec3{50.});
-    Light lightPerso = Light(glm::vec3{0.0001});
+    Light lightPerso = Light(glm::vec3{0.01});
+
+    // RANDOM
+    RandomVariableGenerator randGen;
+    float                   rockSize;
+    int                     nbRock = randGen.uniformDiscrete(1, 10);
+    std::cout << nbRock << std::endl;
+    // Taille de votre cube
+    float cubeSize = 5.0f;
+    // Position des rochers générés aléatoirement
+    std::vector<glm::vec3> rockPositions;
+    for (int i = 0; i < nbRock; i++)
+    {
+        rockSize = static_cast<float>(randGen.normal(0.3, 0.01));
+        if (rockSize < 0.) rockSize = -rockSize;
+        std::cout << rockSize << std::endl;
+        // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
+        float x = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
+        float y = 0.0f;
+        float z = randGen.triangular(-cubeSize / 2, 0, cubeSize / 2); 
+        // Ajouter la position du rocher à la liste
+        rockPositions.push_back(glm::vec3(x, y, z));
+    }
+
+    for (const auto& position : rockPositions)
+    {
+        std::cout << position.x << " " << position.y << " " << position.z << std::endl;
+    }
 
     glEnable(GL_DEPTH_TEST);
 
@@ -232,21 +274,22 @@ int main()
         /*player.drawPlayer(glm::vec3(0., -5., -5.), viewMatrix, ProjMatrix, ShaderPoint, playerTexture);*/
 
         // std::cout << player.getPosition().z << std::endl;
-
         ile.draw(player.getPosition(), glm::vec3{1.}, -100, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, ShaderPoint, ileBake);
-
-        std::cout << "taille des boids" + simulation.getBoids().size() << std::endl;
+        // Dessiner chaque rocher à sa position respective
+        for (const auto& position : rockPositions)
+        {
+            rock.draw(position, glm::vec3{rockSize}, 0, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, ShaderPoint, rockBake);
+        }
 
         for (Boid& b : simulation.getBoids())
         {
             int i = 0;
             i++;
-            std::cout << i << std::endl;
+            // std::cout << i << std::endl;
             boids3D.draw(b.getPosition(), glm::vec3{1.}, -100, glm::vec3(1.f), ProjMatrix, viewMatrix, ShaderPoint, boidBake);
         }
-
         shaderCube.use();
-        cube.draw(glm::vec3(0., -5., -5.), glm::vec3{5.}, shaderCube, viewMatrix, ProjMatrix);
+        cube.draw(glm::vec3(0., 0., 0.), glm::vec3{5.}, shaderCube, viewMatrix, ProjMatrix);
 
         /*glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 

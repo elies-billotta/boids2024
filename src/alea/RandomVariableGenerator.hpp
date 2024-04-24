@@ -17,9 +17,7 @@ public:
     double laplace(double mu, double b);
     double normal(double mu, double sigma);
     double triangular(double a, double b, double c);
-
-private:
     double RAND();
 };
 
-#endif /* RANDOM_VARIABLE_GENERATOR_HPP */
+#endif
