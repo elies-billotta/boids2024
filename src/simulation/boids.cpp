@@ -32,28 +32,42 @@ void Boid::noBounce(float areaSize, glm::vec3 positionCube)
 // The boids bounce against the walls
 void Boid::bounce(float& areaSize, const float& size, const float& strength, const float& scope, glm::vec3 positionCube)
 {
-    glm::vec2   boundsForce = {0., 0.};
-    const float maxX        = areaSize;
-    const float maxY        = areaSize;
-    const float minX        = -areaSize;
-    const float minY        = -areaSize;
+    glm::vec3   boundsForce;
+    const float maxX = areaSize;
+    const float maxY = areaSize;
+    const float maxZ = areaSize;
+    const float minX = -areaSize;
+    const float minY = -areaSize;
+    const float minZ = -areaSize;
 
     // il faudra rajouter -size quand on aura la taille des boids
-    if (m_position.x > areaSize - size - scope)
+    // RIGTH WALL
+    if (m_position.x > areaSize + positionCube.x - scope)
     {
         boundsForce.x = -glm::distance(m_position.x, maxX) * (m_position.x / maxX);
     }
-    if (m_position.x < -areaSize + size + scope)
+    // LEFT WALL
+    if (m_position.x < -areaSize + positionCube.x + scope)
     {
         boundsForce.x = glm::distance(m_position.x, minX) * (minX / m_position.x);
     }
-    if (m_position.y > areaSize - size - scope)
+    // UP WALL
+    if (m_position.y > areaSize + positionCube.y - scope)
     {
         boundsForce.y = -glm::distance(m_position.y, maxY) * (m_position.y / maxY);
     }
-    if (m_position.y < -areaSize + size + scope)
+    // DOWN WALL
+    if (m_position.y < -areaSize + positionCube.y + scope)
     {
         boundsForce.y = glm::distance(m_position.y, minY) * (minY / m_position.y);
+    }
+    if (m_position.z > areaSize + positionCube.z - scope)
+    {
+        boundsForce.z = -glm::distance(m_position.z, maxZ) * (m_position.z / maxZ);
+    }
+    if (m_position.z < -areaSize + positionCube.z + scope)
+    {
+        boundsForce.z = glm::distance(m_position.z, minZ) * (minZ / m_position.z);
     }
 
     m_direction += boundsForce * strength;
@@ -66,7 +80,7 @@ glm::vec3 Boid::getPosition()
     return m_position;
 }
 
-/*glm::vec3 Boid::getDirection()
+glm::vec3 Boid::getDirection()
 {
     return m_direction;
 }
@@ -76,4 +90,3 @@ glm::vec3 Boid::setDirection(glm::vec3 direction)
 {
     m_direction = direction;
 }
-*/

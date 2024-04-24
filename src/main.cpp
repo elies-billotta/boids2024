@@ -23,7 +23,7 @@
 #include "simulation/boids.hpp"
 #include "simulation/simulation.hpp"
 
-const int       N     = 50;
+const int       N     = 100;
 const float     speed = 0.01f;
 const glm::vec3 posPlayer(0., 0., 0.);
 const glm::vec3 posCube(0., -5., -5.);
@@ -76,9 +76,9 @@ int main()
         // ImGui::SliderFloat("Square size", &areaSize, 0.f, 1.f);
         ImGui::ColorPicker4("Color", (float*)&namedColor);
         ImGui::Checkbox("Bounce", &check);
-        /*ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 0.5f);
+        ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 0.5f);
         ImGui::SliderFloat("Cohesion", simulation.getCohesionStrength(), 0.f, 0.5f);
-        ImGui::SliderFloat("Alignement", simulation.getAlignementStrength(), 0.f, 0.5f);*/
+        ImGui::SliderFloat("Alignement", simulation.getAlignementStrength(), 0.f, 0.5f);
         ImGui::End();
     };
 
@@ -193,7 +193,7 @@ int main()
 
         /* *** MOVING PLAYER & BOIDS *** */
         moveListener(ctx, player, camera);
-        simulation.simulate(areaSize, true);
+        simulation.simulate(areaSize, check);
 
         // std::cout << "Camera position: " << camera.getPosition().x << " " << camera.getPosition().y << " " << camera.getPosition().z << std::endl;
 

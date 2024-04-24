@@ -44,14 +44,13 @@ void Simulation::simulate(float areaSize, bool check)
     {
         b.move();
         if (check)
-            b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength, m_boidScope);
+            b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength, m_boidScope, m_positionCube);
         else
             b.noBounce(areaSize, m_positionCube);
 
-        /*separation(b, m_boidScope, m_strengths.separationStrength);
+        separation(b, m_boidScope, m_strengths.separationStrength);
         cohesion(b, m_boidScope, m_strengths.cohesionStrength);
         alignement(b, m_boidScope, m_strengths.alignementStrength);
-        */
     }
 }
 
@@ -60,15 +59,15 @@ std::vector<Boid> Simulation::getBoids()
 {
     return this->m_boids;
 }
-/*
+
 // privates
 
 void Simulation::separation(Boid& currentBoid, const float scope, const float strength)
 {
-    glm::vec2 totalForce = {0., 0.};
+    glm::vec3 totalForce = {0., 0., 0.};
     int       neighbor   = 0;
 
-    for (Boid& b : this->boids)
+    for (Boid& b : this->m_boids)
     {
         if (&currentBoid == &b)
             continue;
@@ -83,7 +82,7 @@ void Simulation::separation(Boid& currentBoid, const float scope, const float st
 
     if (neighbor > 0)
     {
-        glm::vec2 direction = currentBoid.getDirection();
+        glm::vec3 direction = currentBoid.getDirection();
         totalForce /= static_cast<float>(neighbor);
         currentBoid.setDirection(direction += totalForce);
         currentBoid.setDirection(glm::normalize(currentBoid.getDirection()));
@@ -92,10 +91,10 @@ void Simulation::separation(Boid& currentBoid, const float scope, const float st
 
 void Simulation::cohesion(Boid& currentBoid, const float scope, const float strength)
 {
-    glm::vec2 averagePosition = {0.0, 0.0};
-    float     count           = 0;
+    glm::vec3 averagePosition = {0.f, 0.f, 0.f};
+    int       neighbor        = 0;
 
-    for (Boid& b : this->boids)
+    for (Boid& b : this->m_boids)
     {
         if (&currentBoid == &b)
             continue;
@@ -104,13 +103,13 @@ void Simulation::cohesion(Boid& currentBoid, const float scope, const float stre
         if (distance < scope)
         {
             averagePosition += b.getPosition();
-            count++;
+            neighbor++;
         }
     }
-    if (count > 0)
+    if (neighbor > 0)
     {
-        glm::vec2 direction = currentBoid.getDirection();
-        averagePosition /= count;
+        glm::vec3 direction = currentBoid.getDirection();
+        averagePosition /= neighbor;
         currentBoid.setDirection(direction += ((averagePosition - currentBoid.getPosition()) * strength));
         currentBoid.setDirection(glm::normalize(currentBoid.getDirection()));
     }
@@ -118,10 +117,11 @@ void Simulation::cohesion(Boid& currentBoid, const float scope, const float stre
 
 void Simulation::alignement(Boid& currentBoid, const float scope, const float strength)
 {
-    glm::vec2 averageDirection = {0.0, 0.0};
-    float     count            = 0;
+    glm::vec3 averageDirection = {0.f, 0.f, 0.f};
 
-    for (Boid& b : this->boids)
+    int neighbor = 0;
+
+    for (Boid& b : this->m_boids)
     {
         if (&currentBoid == &b)
             continue;
@@ -131,14 +131,14 @@ void Simulation::alignement(Boid& currentBoid, const float scope, const float st
         if (distance < scope)
         {
             averageDirection += b.getDirection();
-            count++;
+            neighbor++;
         }
     }
 
-    if (count > 0)
+    if (neighbor > 0)
     {
-        glm::vec2 direction = currentBoid.getDirection();
-        averageDirection /= count;
+        glm::vec3 direction = currentBoid.getDirection();
+        averageDirection /= neighbor;
         currentBoid.setDirection(direction += averageDirection * strength);
         currentBoid.setDirection(glm::normalize(currentBoid.getDirection()));
     }
@@ -159,4 +159,3 @@ float* Simulation::getAlignementStrength()
 {
     return &m_strengths.alignementStrength;
 }
-*/
