@@ -11,6 +11,7 @@
 #include "../src-common/glimac/default_shader.hpp"
 #include "../src-common/glimac/sphere_vertices.hpp"
 #include "alea/MarkovChain.hpp"
+#include "../src/render/light.hpp"
 #include "alea/RandomVariableGenerator.hpp"
 #include "camera/camera.hpp"
 #include "doctest/doctest.h"
@@ -94,6 +95,7 @@ int       main()
     shader3D.addUniformVariable("uLightIntensity");
     shader3D.addUniformVariable("uLightPos2_vs");
     shader3D.addUniformVariable("uLightIntensity2");
+    shader3D.addUniformVariable("uLightDir_vs");
     shader3D.addUniformVariable("uText");
 
     shaderCube.addUniformVariable("uTexture");
@@ -178,7 +180,8 @@ int       main()
 
     ProjMatrix = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
 
-    // LIGHTS
+    /* *** LIGHTS *** */
+    Light lightSun = Light(glm::vec3(100.f));
 
     // RANDOM
     RandomVariableGenerator randGen;
@@ -201,7 +204,7 @@ int       main()
         float z = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
 
         // Ajouter la position du rocher à la liste
-        rockPositions.push_back(glm::vec3(x, y, z));
+        rockPositions.emplace_back(x, y, z);
     }
 
     // MARKOV CHAIN
@@ -244,11 +247,12 @@ int       main()
         // std::cout << "Camera position: " << camera.getPosition().x << " " << camera.getPosition().y << " " << camera.getPosition().z << std::endl;
 
         glm::mat4 viewMatrix = camera.getViewMatrix();
+
+        /* *** LIGHT *** */
         shader3D.use();
 
-        /*MVMatrix     = glm::translate(glm::mat4(1.0), glm::vec3(0., -5., -5.));
-        MVMatrix     = viewMatrix * MVMatrix;
-        NormalMatrix = glm::transpose(glm::inverse(MVMatrix));*/
+        std::cout << "PLayer position " << player.getPosition().x << " " << player.getPosition().y << " " << player.getPosition().z << std::endl;
+        lightSun.passToShader(shader3D, ProjMatrix, viewMatrix, player.getPosition());
 
         // Utiliser la chaîne de Markov pour déterminer l'état actuel des sparks
 
@@ -277,7 +281,7 @@ int       main()
         }
         time++;
         spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);
-
+      
         // Dessiner chaque rocher à sa position respective
         for (auto rockPosition : rockPositions)
         {
@@ -292,7 +296,9 @@ int       main()
         }
         shaderCube.use();
         cube.draw(posPlayer, glm::vec3{1}, shaderCube, viewMatrix, ProjMatrix);
+
         // std::cout << "x" << cube.getCubePosition().x << "y" << cube.getCubePosition().y << "z" << cube.getCubePosition().z << std::endl;
+
 
         /*glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
