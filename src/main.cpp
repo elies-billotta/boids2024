@@ -10,6 +10,7 @@
 #include "../src-common/glimac/cone_vertices.hpp"
 #include "../src-common/glimac/default_shader.hpp"
 #include "../src-common/glimac/sphere_vertices.hpp"
+#include "alea/MarkovChain.hpp"
 #include "alea/RandomVariableGenerator.hpp"
 #include "camera/camera.hpp"
 #include "doctest/doctest.h"
@@ -27,8 +28,8 @@ const int       N     = 100;
 const float     speed = 0.01f;
 const glm::vec3 posPlayer(0., 0., 0.);
 // const glm::vec3 posCube(0., -5., -5.);
-
-int main()
+const int timer = 30;
+int       main()
 {
     // Run the tests
     if (doctest::Context{}.run() != 0)
@@ -79,6 +80,8 @@ int main()
     img::Image imgPlayer     = p6::load_image_buffer("../assets/texture/player.png");
     img::Image imgBoid       = p6::load_image_buffer("../assets/texture/boid.jpg");
     img::Image imgRock       = p6::load_image_buffer("../assets/texture/rock.png");
+    img::Image imgSpark1     = p6::load_image_buffer("../assets/texture/spark1.png");
+    img::Image imgSpark2     = p6::load_image_buffer("../assets/texture/spark2.png");
 
     // UNIFORM VARIABLE
     shader3D.addUniformVariable("uMVPMatrix");
@@ -102,11 +105,13 @@ int main()
     Model rock     = Model();
     Model player3D = Model();
     Model boids3D  = Model();
+    Model spark3D  = Model();
 
     // LOAD 3D MODEL
     player3D.loadModel("player.obj");
     boids3D.loadModel("star.obj");
     rock.loadModel("rock.obj");
+    spark3D.loadModel("spark.obj");
 
     GLuint playerBake;
     glGenTextures(1, &playerBake);
@@ -135,15 +140,33 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    GLuint sparkBake1, sparkBake2;
+    glGenTextures(1, &sparkBake1);
+    glBindTexture(GL_TEXTURE_2D, sparkBake1);
+    glGenTextures(1, &sparkBake2);
+    glBindTexture(GL_TEXTURE_2D, sparkBake2);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark1.width(), imgSpark1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark1.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark2.width(), imgSpark2.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark2.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     // VBO
     player3D.setVbo();
     boids3D.setVbo();
     rock.setVbo();
+    spark3D.setVbo();
 
     // VAO
     player3D.setVao();
     boids3D.setVao();
     rock.setVao();
+    spark3D.setVao();
 
     // CUBE
     cube.init(imgBackground);
@@ -163,7 +186,6 @@ int main()
     // ROCKS
     float rockSize;
     int   nbRock = randGen.uniformDiscrete(1, 10);
-    std::cout << nbRock << std::endl;
     // Taille de votre cube
     float cubeSize = 5.0f;
     // Position des rochers générés aléatoirement
@@ -173,23 +195,42 @@ int main()
         rockSize = static_cast<float>(randGen.normal(0.3, 0.01));
         if (rockSize < 0.)
             rockSize = -rockSize;
-        std::cout << rockSize << std::endl;
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
         float x = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
-        float y = randGen.triangular(-cubeSize / 2, 0, cubeSize / 2);
-        float z = randGen.triangular(-cubeSize / 2, 0, cubeSize / 2);
+        float y = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
+        float z = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
+
         // Ajouter la position du rocher à la liste
         rockPositions.push_back(glm::vec3(x, y, z));
     }
 
-    for (const auto& position : rockPositions)
-    {
-        std::cout << position.x << " " << position.y << " " << position.z << std::endl;
-    }
+    // MARKOV CHAIN
+    // Créer une matrice de transition pour gérer les changements d'état entre "Texture1" et "Texture2"
+    std::vector<std::vector<double>> transitionMatrix = {
+        {0.8, 0.2, 0.0, 0.0}, // Probabilités de transition de l'état 0 vers les autres états
+        {0.2, 0.3, 0.0, 0.0}, // Probabilités de transition de l'état 1 vers les autres états
+        {0.0, 0.1, 0.3, 0.0}, // Probabilités de transition de l'état 2 vers les autres états
+        {0.0, 0.4, 0.2, 0.8}  // Probabilités de transition de l'état 3 vers les autres états
+    };
+
+    std::unordered_map<int, GLuint> textureMap = {
+        {static_cast<int>(MarkovChainTextureState::Texture1), sparkBake1},
+        {static_cast<int>(MarkovChainTextureState::Texture2), sparkBake2}
+    };
+
+    std::vector<int> states = {static_cast<int>(MarkovChainTextureState::Texture1), static_cast<int>(MarkovChainTextureState::Texture2)}; // États possibles de la chaîne de Markov
+
+    // markovChain constructor
+    MarkovChain markovChain(transitionMatrix, states, randGen);
+
+    int   sparkState          = static_cast<int>((MarkovChainTextureState::Texture1)); // Supposons que 0 est l'état initial
+    float sparkDirectionState = static_cast<float>((MarkovChainDirection::Left));      // Supposons que 0 est l'état initial
 
     glEnable(GL_DEPTH_TEST);
-
+    glm::vec3 sparkMatrix = glm::vec3(0.0f, 0.0f, 0.0f);
     // Declare your infinite update loop.
+    int time   = 0;
+    GLuint currentTexture = sparkBake1;
     ctx.update = [&]() {
         /*********************************
          * RENDERING
@@ -209,12 +250,40 @@ int main()
         MVMatrix     = viewMatrix * MVMatrix;
         NormalMatrix = glm::transpose(glm::inverse(MVMatrix));*/
 
-        // std::cout << player.getPosition().z << std::endl;
-        // Dessiner chaque rocher à sa position respective
-        for (const auto& position : rockPositions)
+        // Utiliser la chaîne de Markov pour déterminer l'état actuel des sparks
+
+        sparkState          = markovChain.nextState(sparkState);
+        sparkDirectionState = markovChain.nextState(sparkDirectionState);
+
+        if (time >= timer)
         {
-            rock.draw(position, glm::vec3{rockSize}, 0, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, shader3D, rockBake);
+            time = 0;
+            // Mettre à jour la texture et la direction des sparks en fonction de leur état
+            if (sparkState == static_cast<int>(MarkovChainTextureState::Texture1))
+            {
+                glBindTexture(GL_TEXTURE_2D, textureMap[sparkState]);
+                currentTexture = sparkBake1;
+            }
+            else{
+                glBindTexture(GL_TEXTURE_2D, textureMap[sparkState]);
+                currentTexture = sparkBake2;
+            }
+            if (sparkState == static_cast<int>(MarkovChainDirection::Left))
+            {
+                sparkMatrix = glm::vec3(-1.0f, 0.0f, 0.0f);
+            }
+            else
+                sparkMatrix = glm::vec3(1.0f, 0.0f, 0.0f);
         }
+        time++;
+        spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);
+
+        // Dessiner chaque rocher à sa position respective
+        for (auto rockPosition : rockPositions)
+        {
+            rock.draw(rockPosition, glm::vec3{rockSize}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, rockBake);
+        }
+
         player3D.draw(player.getPosition(), glm::vec3{1.}, -100, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, shader3D, playerBake);
 
         for (Boid& b : simulation.getBoids())
@@ -222,11 +291,8 @@ int main()
             boids3D.draw(b.getPosition(), glm::vec3{3.}, b.getAngle(), glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, boidBake);
         }
         shaderCube.use();
-
         cube.draw(posPlayer, glm::vec3{1}, shaderCube, viewMatrix, ProjMatrix);
-
         // std::cout << "x" << cube.getCubePosition().x << "y" << cube.getCubePosition().y << "z" << cube.getCubePosition().z << std::endl;
-        std::cout << "x" << player.getPosition().x << "y" << player.getPosition().y << "z" << player.getPosition().z << std::endl;
 
         /*glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
