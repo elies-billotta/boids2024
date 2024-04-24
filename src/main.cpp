@@ -198,6 +198,8 @@ int main()
 
     // RANDOM
     RandomVariableGenerator randGen;
+
+    //ROCKS
     float                   rockSize;
     int                     nbRock = randGen.uniformDiscrete(1, 10);
     std::cout << nbRock << std::endl;
@@ -212,7 +214,7 @@ int main()
         std::cout << rockSize << std::endl;
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
         float x = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
-        float y = 0.0f;
+        float y = randGen.triangular(-cubeSize / 2, 0, cubeSize / 2);
         float z = randGen.triangular(-cubeSize / 2, 0, cubeSize / 2); 
         // Ajouter la position du rocher à la liste
         rockPositions.push_back(glm::vec3(x, y, z));
