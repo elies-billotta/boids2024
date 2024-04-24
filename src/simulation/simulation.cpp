@@ -1,18 +1,26 @@
 #include "simulation.hpp"
 
 // Constructor
-Simulation::Simulation(int N, float areaSize, float size)
+Simulation::Simulation(int N, float areaSize, float size, glm::vec3 positionCube)
 {
-    glm::vec3 position  = {0., 1., -10.};
-    glm::vec3 velocity  = {0.f, 0.f, 0.f};
-    glm::vec3 direction = {0.f, 0.f, 0.f};
+    glm::vec3 position = {0., 1., -10.};
+    glm::vec3 velocity = {0.5f, 0.5f, 0.2f};
+    velocity *= 0.1f;
 
     for (int i = 0; i < N; i++)
     {
-        /*float x = areaSize * (2 * static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1);
-        float y = areaSize * (2 * static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1);*/
-        this->m_boids.emplace_back(position, velocity, direction);
-        m_sizeBoid = size;
+        glm::vec3 direction = {p6::random::direction(), 1.};
+
+        float x           = p6::random::number(-areaSize + positionCube.x, areaSize + positionCube.x);
+        float y           = p6::random::number(-areaSize + positionCube.y, areaSize + positionCube.y);
+        float z           = p6::random::number(-areaSize + positionCube.z, areaSize + positionCube.z);
+        float randomAngle = p6::random::number(0, 360);
+
+        position = {x, y, z};
+
+        this->m_boids.emplace_back(position, velocity, direction, randomAngle);
+        m_sizeBoid     = size;
+        m_positionCube = positionCube;
     }
 }
 
@@ -28,15 +36,15 @@ void Simulation::draw(p6::Context& ctx)
     }
 }
 
-/*void Simulation::simulate(float areaSize, bool check)
+void Simulation::simulate(float areaSize, bool check)
 {
-    for (Boid& b : this->boids)
+    for (Boid& b : this->m_boids)
     {
         b.move();
         if (check)
-            b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength, m_boidScope);
+            b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength, m_boidScope, m_positionCube);
         else
-            b.noBounce(areaSize);
+            b.noBounce(areaSize, m_positionCube);
 
         separation(b, m_boidScope, m_strengths.separationStrength);
         cohesion(b, m_boidScope, m_strengths.cohesionStrength);
@@ -49,15 +57,15 @@ std::vector<Boid> Simulation::getBoids()
 {
     return this->m_boids;
 }
-/*
+
 // privates
 
 void Simulation::separation(Boid& currentBoid, const float scope, const float strength)
 {
-    glm::vec2 totalForce = {0., 0.};
+    glm::vec3 totalForce = {0., 0., 0.};
     int       neighbor   = 0;
 
-    for (Boid& b : this->boids)
+    for (Boid& b : this->m_boids)
     {
         if (&currentBoid == &b)
             continue;
@@ -72,7 +80,7 @@ void Simulation::separation(Boid& currentBoid, const float scope, const float st
 
     if (neighbor > 0)
     {
-        glm::vec2 direction = currentBoid.getDirection();
+        glm::vec3 direction = currentBoid.getDirection();
         totalForce /= static_cast<float>(neighbor);
         currentBoid.setDirection(direction += totalForce);
         currentBoid.setDirection(glm::normalize(currentBoid.getDirection()));
@@ -81,10 +89,10 @@ void Simulation::separation(Boid& currentBoid, const float scope, const float st
 
 void Simulation::cohesion(Boid& currentBoid, const float scope, const float strength)
 {
-    glm::vec2 averagePosition = {0.0, 0.0};
-    float     count           = 0;
+    glm::vec3 averagePosition = {0.f, 0.f, 0.f};
+    int       neighbor        = 0;
 
-    for (Boid& b : this->boids)
+    for (Boid& b : this->m_boids)
     {
         if (&currentBoid == &b)
             continue;
@@ -93,13 +101,13 @@ void Simulation::cohesion(Boid& currentBoid, const float scope, const float stre
         if (distance < scope)
         {
             averagePosition += b.getPosition();
-            count++;
+            neighbor++;
         }
     }
-    if (count > 0)
+    if (neighbor > 0)
     {
-        glm::vec2 direction = currentBoid.getDirection();
-        averagePosition /= count;
+        glm::vec3 direction = currentBoid.getDirection();
+        averagePosition /= neighbor;
         currentBoid.setDirection(direction += ((averagePosition - currentBoid.getPosition()) * strength));
         currentBoid.setDirection(glm::normalize(currentBoid.getDirection()));
     }
@@ -107,10 +115,11 @@ void Simulation::cohesion(Boid& currentBoid, const float scope, const float stre
 
 void Simulation::alignement(Boid& currentBoid, const float scope, const float strength)
 {
-    glm::vec2 averageDirection = {0.0, 0.0};
-    float     count            = 0;
+    glm::vec3 averageDirection = {0.f, 0.f, 0.f};
 
-    for (Boid& b : this->boids)
+    int neighbor = 0;
+
+    for (Boid& b : this->m_boids)
     {
         if (&currentBoid == &b)
             continue;
@@ -120,14 +129,14 @@ void Simulation::alignement(Boid& currentBoid, const float scope, const float st
         if (distance < scope)
         {
             averageDirection += b.getDirection();
-            count++;
+            neighbor++;
         }
     }
 
-    if (count > 0)
+    if (neighbor > 0)
     {
-        glm::vec2 direction = currentBoid.getDirection();
-        averageDirection /= count;
+        glm::vec3 direction = currentBoid.getDirection();
+        averageDirection /= neighbor;
         currentBoid.setDirection(direction += averageDirection * strength);
         currentBoid.setDirection(glm::normalize(currentBoid.getDirection()));
     }
@@ -148,4 +157,3 @@ float* Simulation::getAlignementStrength()
 {
     return &m_strengths.alignementStrength;
 }
-*/

@@ -2,8 +2,8 @@
 // #include "../src/game/include/player.hpp"
 #include "../src/render/program.hpp"
 
-Cube::Cube(float size)
-    : m_size(size), texture(0)
+Cube::Cube(float size, glm::vec3 position)
+    : m_size(size), texture(0), m_position(position)
 {
 }
 
@@ -25,11 +25,11 @@ void Cube::textures(img::Image& img_load)
 void Cube::vectors()
 {
     // Calculer les coordonnées des sommets
-    float x = m_size / 5.f;
+    /*float x = m_size / 5.f;
     float y = m_size / 5.f;
-    float z = m_size / 5.f;
+    float z = m_size / 5.f;*/
 
-    vertices = {
+    /*vertices = {
         // Face avant
         -x, -y + 1, -z, // 0
         x, -y + 1, -z,  // 1
@@ -65,6 +65,44 @@ void Cube::vectors()
         x, -y + 1, -z,  // 21
         x, -y + 1, z,   // 22
         -x, -y + 1, z   // 23
+    };*/
+
+    vertices = {
+        // Face avant
+        -m_size, -m_size, -m_size, // 0
+        m_size, -m_size, -m_size,  // 1
+        m_size, m_size, -m_size,   // 2
+        -m_size, m_size, -m_size,  // 3
+
+        // Face arrière
+        m_size, -m_size, m_size,  // 4
+        -m_size, -m_size, m_size, // 5
+        -m_size, m_size, m_size,  // 6
+        m_size, m_size, m_size,   // 7
+
+        // Face gauche
+        -m_size, -m_size, m_size,  // 8
+        -m_size, -m_size, -m_size, // 9
+        -m_size, m_size, -m_size,  // 10
+        -m_size, m_size, m_size,   // 11
+
+        // Face droite
+        m_size, -m_size, -m_size, // 12
+        m_size, -m_size, m_size,  // 13
+        m_size, m_size, m_size,   // 14
+        m_size, m_size, -m_size,  // 15
+
+        // Face supérieure
+        -m_size, m_size, -m_size, // 16
+        m_size, m_size, -m_size,  // 17
+        m_size, m_size, m_size,   // 18
+        -m_size, m_size, m_size,  // 19
+
+        // Face inférieure
+        -m_size, -m_size, -m_size, // 20
+        m_size, -m_size, -m_size,  // 21
+        m_size, -m_size, m_size,   // 22
+        -m_size, -m_size, m_size   // 23
     };
 
     std::vector<float> textureCoords = {
@@ -196,6 +234,22 @@ void Cube::draw(glm::vec3 pos, glm::vec3 scale, Program& program, glm::mat4 view
     glBindVertexArray(vao);
     glBindTexture(GL_TEXTURE_2D, texture);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+}
+
+/* *** GETTERS *** */
+float Cube::getSize()
+{
+    return m_size;
+}
+
+glm::vec3 Cube::getPosition()
+{
+    return m_position;
+}
+
+glm::vec3 Cube::getCubePosition()
+{
+    return m_position + glm::vec3(m_size, m_size, m_size);
 }
 
 /*void Cube::borders(Player& player)

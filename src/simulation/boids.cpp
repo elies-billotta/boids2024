@@ -1,27 +1,28 @@
 #include "boids.hpp"
 
 // Constructor
-Boid::Boid(glm::vec3 position, glm::vec3 velocity, glm::vec3 direction)
-    : m_position(position), m_velocity(velocity), m_direction(direction)
+Boid::Boid(glm::vec3 position, glm::vec3 velocity, glm::vec3 direction, float randomAngle)
+    : m_position(position), m_velocity(velocity), m_direction(direction), m_angle(randomAngle)
 {
 }
 
 // Methods
-/*void Boid::move()
+void Boid::move()
 {
     m_position.x += m_direction.x * m_velocity.x;
     m_position.y += m_direction.y * m_velocity.y;
+    m_position.z += m_direction.z * m_velocity.z;
 }
 
-void Boid::noBounce(float areaSize)
+void Boid::noBounce(float areaSize, glm::vec3 positionCube)
 {
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
-        if (m_position[i] > areaSize)
+        if (m_position[i] > areaSize + positionCube[i])
         {
             m_position[i] = -areaSize;
         }
-        if (m_position[i] < -areaSize)
+        if (m_position[i] < -areaSize + positionCube[i])
         {
             m_position[i] = areaSize;
         }
@@ -29,34 +30,49 @@ void Boid::noBounce(float areaSize)
 }
 
 // The boids bounce against the walls
-void Boid::bounce(float& areaSize, const float& size, const float& strength, const float& scope)
+void Boid::bounce(float& areaSize, const float& size, const float& strength, const float& scope, glm::vec3 positionCube)
 {
-    glm::vec2   boundsForce = {0., 0.};
-    const float maxX        = areaSize;
-    const float maxY        = areaSize;
-    const float minX        = -areaSize;
-    const float minY        = -areaSize;
+    glm::vec3   boundsForce;
+    const float maxX = areaSize;
+    const float maxY = areaSize;
+    const float maxZ = areaSize;
+    const float minX = -areaSize;
+    const float minY = -areaSize;
+    const float minZ = -areaSize;
 
-    if (m_position.x > areaSize - size - scope)
+    // il faudra rajouter -size quand on aura la taille des boids
+    // RIGTH WALL
+    if (m_position.x > areaSize + positionCube.x - scope)
     {
         boundsForce.x = -glm::distance(m_position.x, maxX) * (m_position.x / maxX);
     }
-    if (m_position.x < -areaSize + size + scope)
+    // LEFT WALL
+    if (m_position.x < -areaSize + positionCube.x + scope)
     {
         boundsForce.x = glm::distance(m_position.x, minX) * (minX / m_position.x);
     }
-    if (m_position.y > areaSize - size - scope)
+    // UP WALL
+    if (m_position.y > areaSize + positionCube.y - scope)
     {
         boundsForce.y = -glm::distance(m_position.y, maxY) * (m_position.y / maxY);
     }
-    if (m_position.y < -areaSize + size + scope)
+    // DOWN WALL
+    if (m_position.y < -areaSize + positionCube.y + scope)
     {
         boundsForce.y = glm::distance(m_position.y, minY) * (minY / m_position.y);
+    }
+    if (m_position.z > areaSize + positionCube.z - scope)
+    {
+        boundsForce.z = -glm::distance(m_position.z, maxZ) * (m_position.z / maxZ);
+    }
+    if (m_position.z < -areaSize + positionCube.z + scope)
+    {
+        boundsForce.z = glm::distance(m_position.z, minZ) * (minZ / m_position.z);
     }
 
     m_direction += boundsForce * strength;
     m_direction = glm::normalize(m_direction);
-}*/
+}
 
 // GETTERS
 glm::vec3 Boid::getPosition()
@@ -67,6 +83,11 @@ glm::vec3 Boid::getPosition()
 glm::vec3 Boid::getDirection()
 {
     return m_direction;
+}
+
+float Boid::getAngle()
+{
+    return m_angle;
 }
 
 // SETTERS
