@@ -47,7 +47,7 @@ int          main()
     /*********************************
      * INITIALIZATION SIMULATION
      *********************************/
-    Player player(glm::vec3(0.f, 0.f, 0.f));
+    Player player(glm::vec3(0.f, 0.f, 0.f), ctx.mouse());
     Camera camera(player.getPosition());
     float  scope = 1.5f;
 
@@ -297,7 +297,7 @@ int          main()
             rock.draw(glm::vec3{rockPosition[0], rockPosition[1], rockPosition[2]}, glm::vec3{rockPosition[3]}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, rockBake);
         }
 
-        player3D.draw(player.getPosition(), glm::vec3{1.}, -100, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, shader3D, playerBake);
+        player.draw(player3D, glm::vec3{1.}, ProjMatrix, viewMatrix, shader3D, playerBake);
 
         for (Boid& b : simulation.getBoids())
         {
@@ -313,12 +313,9 @@ int          main()
 
     // delete 3D model
     player3D.~Model();
-
-    /*glDeleteTextures(1, &tex);
-    glDeleteBuffers(1, &vbo);
-    glDeleteVertexArrays(1, &vao);*/
     cube.~Cube();
 
+    // delete shaders
     shaderCube.~Program();
     shader3D.~Program();
 }
