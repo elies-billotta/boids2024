@@ -54,6 +54,15 @@ void Player::move(const p6::Context& ctx, Player& player, Camera& camera, Cube& 
         savePos += -m_speed * m_LeftVector;
     }
 
+    if (ctx.key_is_pressed(GLFW_KEY_C))
+    {
+        savePos += m_speed * m_UpVector;
+    }
+    if (ctx.key_is_pressed(GLFW_KEY_SPACE))
+    {
+        savePos += -m_speed * m_UpVector;
+    }
+
     if (verifBorder(savePos, cube))
         m_pos = savePos;
 

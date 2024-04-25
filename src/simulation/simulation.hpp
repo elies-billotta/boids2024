@@ -9,7 +9,7 @@
 class Simulation {
 public:
     // Constructor
-    Simulation(int N, float areaSize, float size, glm::vec3 positionCube);
+    Simulation(int N, float areaSize, float size, glm::vec3 positionCube, float scope);
 
     // Methods
     void draw(p6::Context& ctx);
@@ -30,6 +30,6 @@ private:
     glm::vec3         m_positionCube;
     float             m_sizeBoid;
     Strengths         m_strengths;
-    float             m_boidScope = 1.f;
+    float             m_scope;
     float             m_wallsScope;
 };
