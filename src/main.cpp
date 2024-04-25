@@ -29,7 +29,7 @@ const int       N     = 100;
 const float     speed = 0.01f;
 const glm::vec3 posPlayer(0., 0., 0.);
 // const glm::vec3 posCube(0., -5., -5.);
-const int    timer  = 30;
+int    timer  = 30;
 const double lambda = 0.1;
 int          main()
 {
@@ -189,20 +189,20 @@ int          main()
 
     // ROCKS
     float rockSize;
-    int   nbRock = randGen.uniformDiscrete(1, 10);
+    int   nbRock = randGen.uniformDiscrete(1, 100);
     // Taille de votre cube
     float cubeSize = 5.0f;
     // Position des rochers générés aléatoirement
     std::vector<glm::vec3> rockPositions;
     for (int i = 0; i < nbRock; i++)
     {
-        rockSize = static_cast<float>(randGen.normal(0.3, 0.01));
+        rockSize = static_cast<float>(randGen.normal(0.9, 0.1));
         if (rockSize < 0.)
             rockSize = -rockSize;
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
-        float x = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
-        float y = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
-        float z = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
+        float x = randGen.triangular(-cubeSize*2, cubeSize*2, cubeSize*2);
+        float y = randGen.triangular(-cubeSize*2, cubeSize*2, cubeSize*2);
+        float z = randGen.triangular(-cubeSize*2, cubeSize*2, cubeSize*2);
 
         // Ajouter la position du rocher à la liste
         rockPositions.emplace_back(x, y, z);
@@ -211,10 +211,10 @@ int          main()
     // MARKOV CHAIN
     // Créer une matrice de transition pour gérer les changements d'état entre "Texture1" et "Texture2"
     std::vector<std::vector<double>> transitionMatrix = {
-        {0.8, 0.2, 0.9, 0.0}, // Probabilités de transition de l'état 0 vers les autres états
-        {0.2, 0.0, 0.0, 0.0}, // Probabilités de transition de l'état 1 vers les autres états
+        {0.9, 0.1, 0.0, 0.0}, // Probabilités de transition de l'état 0 vers les autres états
+        {0.1, 0.0, 0.0, 0.0}, // Probabilités de transition de l'état 1 vers les autres états
         {0.0, 0.0, 0.3, 0.0}, // Probabilités de transition de l'état 2 vers les autres états
-        {0.0, 0.4, 0.2, 0.8}  // Probabilités de transition de l'état 3 vers les autres états
+        {0.0, 0.4, 0.2, 0.4}  // Probabilités de transition de l'état 3 vers les autres états
     };
 
     std::unordered_map<int, GLuint> textureMap = {
@@ -234,6 +234,7 @@ int          main()
     glm::vec3 sparkMatrix = glm::vec3(0.0f, 0.0f, 0.0f);
     // Declare your infinite update loop.
     int    time           = 0;
+    int    timeLight      = 0;
     GLuint currentTexture = sparkBake1;
     ctx.update            = [&]() {
         /*********************************
@@ -251,9 +252,14 @@ int          main()
 
         /* *** LIGHT *** */
         shader3D.use();
+        if (timeLight >= timer + 500)
+        {
+            lightSun = Light(glm::vec3(randGen.exponential(lambda)));
+            timeLight = 0;
+        }
         std::cout << "PLayer position " << player.getPosition().x << " " << player.getPosition().y << " " << player.getPosition().z << std::endl;
         lightSun.passToShader(shader3D, ProjMatrix, viewMatrix, player.getPosition());
-
+        timeLight++;
         // Utiliser la chaîne de Markov pour déterminer l'état actuel des sparks
 
         sparkState          = markovChain.nextState(sparkState);
@@ -261,8 +267,7 @@ int          main()
 
         if (time >= timer)
         {
-            lightSun = Light(glm::vec3(randGen.exponential(lambda)));
-            time = 0;
+            time     = 0;
             // Mettre à jour la texture et la direction des sparks en fonction de leur état
             if (sparkState == static_cast<int>(MarkovChainTextureState::Texture1))
             {
@@ -278,6 +283,7 @@ int          main()
             }
             else
                 sparkMatrix = glm::vec3(1.0f, 0.0f, 0.0f);
+            timer = randGen.geometric(0.1);
         }
         time++;
         spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);
