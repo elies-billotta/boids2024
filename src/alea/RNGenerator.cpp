@@ -1,18 +1,18 @@
-#include "RandomVariableGenerator.hpp"
+#include "RNGenerator.hpp"
 
-RandomVariableGenerator::RandomVariableGenerator()
+RNGenerator::RNGenerator()
 {
     // Initialisation de la graine pour RAND() avec le temps actuel
     srand(static_cast<unsigned int>(time(nullptr)));
 }
 
-double RandomVariableGenerator::RAND()
+double RNGenerator::RAND()
 {
     // Génération d'un nombre aléatoire entre 0 et 1
     return static_cast<double>(rand()) / RAND_MAX;
 }
 
-int RandomVariableGenerator::hypergeometric(int populationSize, int successStates, int sampleSize)
+int RNGenerator::hypergeometric(int populationSize, int successStates, int sampleSize)
 {
     if (successStates > populationSize || sampleSize > populationSize)
     {
@@ -31,7 +31,7 @@ int RandomVariableGenerator::hypergeometric(int populationSize, int successState
     return count;
 }
 
-int RandomVariableGenerator::bernoulli(double p)
+int RNGenerator::bernoulli(double p)
 {
     if (p < 0 || p > 1)
     {
@@ -40,7 +40,7 @@ int RandomVariableGenerator::bernoulli(double p)
     return RAND() < p ? 1 : 0;
 }
 
-int RandomVariableGenerator::uniformDiscrete(int min, int max)
+int RNGenerator::uniformDiscrete(int min, int max)
 {
     if (min > max)
     {
@@ -51,7 +51,7 @@ int RandomVariableGenerator::uniformDiscrete(int min, int max)
     return min + static_cast<int>(RAND() * (max - min + 1));
 }
 
-int RandomVariableGenerator::geometric(double p)
+int RNGenerator::geometric(double p)
 {
     if (p < 0 || p > 1)
     {
@@ -60,7 +60,7 @@ int RandomVariableGenerator::geometric(double p)
     return std::log(1.0 - RAND()) / std::log(1.0 - p);
 }
 
-double RandomVariableGenerator::exponential(double lambda)
+double RNGenerator::exponential(double lambda)
 {
     if (lambda <= 0)
     {
@@ -69,19 +69,19 @@ double RandomVariableGenerator::exponential(double lambda)
     return -std::log(1.0 - RAND()) / lambda;
 }
 
-double RandomVariableGenerator::laplace(double mu, double b)
+double RNGenerator::laplace(double mu, double b)
 {
     double u = RAND() - 0.5;
     return mu - b * std::copysign(1.0, u) * std::log(1.0 - 2.0 * std::fabs(u));
 }
 
-double RandomVariableGenerator::normal(double mu, double sigma)
+double RNGenerator::normal(double mu, double sigma)
 {
     double Z = std::sqrt(-2.0 * std::log(RAND())) * std::cos(2.0 * M_PI * RAND());
     return mu + sigma * Z;
 }
 
-double RandomVariableGenerator::triangular(double a, double b, double c)
+double RNGenerator::triangular(double a, double b, double c)
 {
     return RAND() < (c - a) / (b - a) ? a + std::sqrt(RAND() * (b - a) * (c - a)) : b - std::sqrt((1 - RAND()) * (b - a) * (b - c));
 }

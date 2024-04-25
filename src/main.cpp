@@ -1,42 +1,32 @@
 #include <imgui.h>
 #include <cstdlib>
-#include <iostream>
 #include <vector>
 #include "glm/fwd.hpp"
-#include "glm/glm.hpp"
-#include "glm/gtc/type_ptr.hpp"
 #include "glpp/glpp.hpp"
 #define DOCTEST_CONFIG_IMPLEMENT
-#include "../src-common/glimac/common.hpp"
-#include "../src-common/glimac/cone_vertices.hpp"
-#include "../src-common/glimac/default_shader.hpp"
-#include "../src-common/glimac/sphere_vertices.hpp"
 #include "../src/render/light.hpp"
 #include "alea/MarkovChain.hpp"
-#include "alea/RandomVariableGenerator.hpp"
+#include "alea/RNGenerator.hpp"
 #include "camera/camera.hpp"
 #include "doctest/doctest.h"
-#include "glm/fwd.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "p6/p6.h"
 #include "player/player.hpp"
+#include "render/TextureBaker.hpp"
 #include "render/cube.hpp"
 #include "render/model.hpp"
 #include "render/program.hpp"
 #include "simulation/boids.hpp"
 #include "simulation/simulation.hpp"
 
-const int   N     = 100;
-const float speed = 0.01f;
-// const glm::vec3 posCube(0., -5., -5.);
-int          timer         = 30;
-const double lambda        = 0.1;
-int          indexTextures = 0;
-int          main()
+const int   nbBoids  = 100;
+const float areaSize = 20.f;
+
+int main()
 {
     // Run the tests
     if (doctest::Context{}.run() != 0)
+    {
         return EXIT_FAILURE;
+    }
 
     // Actual application code
     auto ctx = p6::Context{{.title = "Boids will be boids"}};
@@ -51,21 +41,10 @@ int          main()
     Camera camera(player.getPosition());
     float  scope = 1.5f;
 
-    Cube       cube(20.0f, player.getPosition());
-    Simulation simulation = Simulation(N, cube.getSize(), 0.03f, player.getPosition(), scope);
-    ImVec4     namedColor = ImVec4(0.4f, 0.7f, 0.0f, 1.0f);
+    Cube       cube(areaSize, player.getPosition());
+    Simulation simulation = Simulation(nbBoids, cube.getSize(), 0.03f, player.getPosition(), scope);
     bool       check      = false;
-
-    ctx.imgui = [&]() {
-        ImGui::Begin("Test");
-        // ImGui::SliderFloat("Square size", &areaSize, 0.f, 1.f);
-        ImGui::ColorPicker4("Color", (float*)&namedColor);
-        ImGui::Checkbox("Bounce", &check);
-        ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 0.5f);
-        ImGui::SliderFloat("Cohesion", simulation.getCohesionStrength(), 0.f, 0.5f);
-        ImGui::SliderFloat("Alignement", simulation.getAlignementStrength(), 0.f, 0.5f);
-        ImGui::End();
-    };
+    int        timer      = 30;
 
     /*********************************
      * 3D INITIALIZATION
@@ -80,7 +59,7 @@ int          main()
     img::Image imgSpark2     = p6::load_image_buffer("../assets/texture/spark2.png");
     img::Image imgSpark3     = p6::load_image_buffer("../assets/texture/spark3.png");
     img::Image imgSpark4     = p6::load_image_buffer("../assets/texture/spark4.png");
-    img::Image imgRock       = p6::load_image_buffer("../assets/texture/planet.jpg");
+    img::Image imgPlanet       = p6::load_image_buffer("../assets/texture/planet.jpg");
 
     // UNIFORM VARIABLE
     shader3D.addUniformVariable("uMVPMatrix");
@@ -93,16 +72,14 @@ int          main()
     shader3D.addUniformVariable("uLightIntensity");
     shader3D.addUniformVariable("uLightPos2_vs");
     shader3D.addUniformVariable("uLightIntensity2");
-    shader3D.addUniformVariable("uLightDir_vs");
     shader3D.addUniformVariable("uText");
-
     shaderCube.addUniformVariable("uTexture");
     shaderCube.addUniformVariable("uMVPMatrix");
     shaderCube.addUniformVariable("uMVMatrix");
     shaderCube.addUniformVariable("uNormalMatrix");
 
     // 3D MODEL
-    Model rock     = Model();
+    Model planet   = Model();
     Model player3D = Model();
     Model boids3D  = Model();
     Model spark3D  = Model();
@@ -111,114 +88,60 @@ int          main()
     player3D.loadModel("player.obj");
     boids3D.loadModel("star.obj");
     spark3D.loadModel("spark.obj");
-    rock.loadModel("planet.obj");
+    planet.loadModel("planet.obj");
 
-    GLuint playerBake;
-    glGenTextures(1, &playerBake);
-    glBindTexture(GL_TEXTURE_2D, playerBake);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgPlayer.width(), imgPlayer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgPlayer.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    GLuint boidBake;
-    glGenTextures(1, &boidBake);
-    glBindTexture(GL_TEXTURE_2D, boidBake);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgBoid.width(), imgBoid.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBoid.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    GLuint rockBake;
-    glGenTextures(1, &rockBake);
-    glBindTexture(GL_TEXTURE_2D, rockBake);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgRock.width(), imgRock.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgRock.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    GLuint sparkBake1, sparkBake2;
-    GLuint sparkBake3, sparkBake4;
-    glGenTextures(1, &sparkBake1);
-    glBindTexture(GL_TEXTURE_2D, sparkBake1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark1.width(), imgSpark1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark1.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // Génération de la texture sparkBake2
-    glGenTextures(1, &sparkBake2);
-    glBindTexture(GL_TEXTURE_2D, sparkBake2);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark2.width(), imgSpark2.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark2.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0); // Délier la texture
-
-    // Génération de la texture sparkBake2
-    glGenTextures(1, &sparkBake3);
-    glBindTexture(GL_TEXTURE_2D, sparkBake3);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark3.width(), imgSpark3.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark3.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0); // Délier la texture
-
-    // Génération de la texture sparkBake2
-    glGenTextures(1, &sparkBake4);
-    glBindTexture(GL_TEXTURE_2D, sparkBake4);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark4.width(), imgSpark4.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark4.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0); // Délier la texture
-
-    std::vector<GLuint> textures = {sparkBake1, sparkBake2, sparkBake3, sparkBake4};
+    // TEXTURE
+    GLuint              playerBake = TextureBaker::bake(imgPlayer);
+    GLuint              boidBake   = TextureBaker::bake(imgBoid);
+    GLuint              planetBake   = TextureBaker::bake(imgPlanet);
+    GLuint              sparkBake1 = TextureBaker::bake(imgSpark1);
+    GLuint              sparkBake2 = TextureBaker::bake(imgSpark2);
+    GLuint              sparkBake3 = TextureBaker::bake(imgSpark3);
+    GLuint              sparkBake4 = TextureBaker::bake(imgSpark4);
+    std::vector<GLuint> textures   = {sparkBake1, sparkBake2, sparkBake3, sparkBake4};
 
     // VBO
     player3D.setVbo();
     boids3D.setVbo();
-    rock.setVbo();
+    planet.setVbo();
     spark3D.setVbo();
 
     // VAO
     player3D.setVao();
     boids3D.setVao();
-    rock.setVao();
+    planet.setVao();
     spark3D.setVao();
 
     // CUBE
     cube.init(imgBackground);
 
-    /* MATRIX FOR SHADERS*/
+    // MATRIX FOR SHADERS
     glm::mat4 ProjMatrix;
-    glm::mat4 MVMatrix;
-    glm::mat4 NormalMatrix;
 
     ProjMatrix = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
 
-    /* *** LIGHTS *** */
+    // LIGHTS
     Light lightPlayer = Light(glm::vec3(80.f));
     Light lightBoid   = Light(glm::vec3(1.f));
 
     // RANDOM
-    RandomVariableGenerator randGen;
 
-    // ROCKS
-    int nbRock = randGen.triangular(1, 5, 10);
-    // Taille de votre cube
-    float cubeSize = 5.0f;
-    // Position des rochers générés aléatoirement
+    // PLANETS
+    int                    nbPlanets = static_cast<int>(RNGenerator::triangular(1, 5, 10));
     std::vector<glm::vec4> planetsData;
-    std::cout << "nbRock : " << nbRock << std::endl;
-    for (int i = 0; i < nbRock; i++)
+    for (int i = 0; i < nbPlanets; i++)
     {
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
-        float x          = randGen.uniformDiscrete(-cubeSize, cubeSize);
-        float y          = randGen.uniformDiscrete(-cubeSize, cubeSize);
-        float z          = randGen.uniformDiscrete(-cubeSize, cubeSize);
-        float planetSize = static_cast<float>(randGen.laplace(0.1, 0.2));
+        auto xCoord     = static_cast<float>(RNGenerator::uniformDiscrete(-static_cast<int>(areaSize) + 1, static_cast<int>(areaSize) - 1));
+        auto yCoord     = static_cast<float>(RNGenerator::uniformDiscrete(-static_cast<int>(areaSize) + 1, static_cast<int>(areaSize) - 1));
+        auto zCoord     = static_cast<float>(RNGenerator::uniformDiscrete(-static_cast<int>(areaSize) + 1, static_cast<int>(areaSize - 3)));
+        auto planetSize = static_cast<float>(RNGenerator::laplace(0.1, 0.2));
         if (planetSize < 0)
+        {
             planetSize = -planetSize;
+        }
         // Ajouter la position du rocher à la liste
-        planetsData.emplace_back(x, y, z, planetSize);
+        planetsData.emplace_back(xCoord, yCoord, zCoord, planetSize);
     }
 
     // MARKOV CHAIN
@@ -230,23 +153,53 @@ int          main()
     };
 
     std::unordered_map<int, GLuint> textureMap = {
-        {static_cast<int>(MarkovChainTextureState::Texture1), sparkBake1},
-        {static_cast<int>(MarkovChainTextureState::Texture2), sparkBake2}
+        {static_cast<int>(MarkovChainSparkState::TextureUpdate), sparkBake1},
+        {static_cast<int>(MarkovChainSparkState::PositionUpdate), sparkBake2}
     };
 
-    std::vector<int> states = {static_cast<int>(MarkovChainTextureState::Texture1), static_cast<int>(MarkovChainTextureState::Texture2)};
+    std::vector<int> states = {static_cast<int>(MarkovChainSparkState::TextureUpdate), static_cast<int>(MarkovChainSparkState::PositionUpdate)};
 
-    MarkovChain markovChain(transitionMatrix, states, randGen);
+    MarkovChain markovChain(transitionMatrix, states);
 
-    int   sparkState          = static_cast<int>((MarkovChainTextureState::Texture1));
-    float sparkDirectionState = static_cast<float>((MarkovChainDirection::RandomPosition));
+    int  sparkState       = static_cast<int>((MarkovChainSparkState::TextureUpdate));
+    auto playerLightState = static_cast<float>((MarkovChainLightState::LightOn));
 
     glEnable(GL_DEPTH_TEST);
     glm::vec3 sparkMatrix    = glm::vec3(0.0f, 0.0f, 0.0f);
     int       time           = 0;
-    int       timeLight      = 0;
     GLuint    currentTexture = sparkBake1;
-    ctx.update               = [&]() {
+    if (RNGenerator::bernoulli(0.5) == 1)
+    {
+        currentTexture = sparkBake1;
+    }
+    else
+    {
+        currentTexture = sparkBake2;
+    }
+
+    ctx.imgui = [&]() {
+        ImGui::Begin("Control Panel");
+
+        // Section Planets
+        ImGui::Text("Planets:");
+        ImGui::Text("Number of Planets : %i", nbPlanets);
+
+        // Section Player
+        ImGui::Separator();
+        ImGui::Text("Player:");
+        ImGui::Text("Position: (%.2fx, %.2fy, %.2fz)", player.getPosition().x, player.getPosition().y, player.getPosition().z);
+
+        // Section Boids
+        ImGui::Separator();
+        ImGui::Text("Boids:");
+        ImGui::Checkbox("Enable Bounce", &check);
+        ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 0.5f);
+        ImGui::SliderFloat("Cohesion", simulation.getCohesionStrength(), 0.f, 0.5f);
+        ImGui::SliderFloat("Alignement", simulation.getAlignementStrength(), 0.f, 0.5f);
+        ImGui::End();
+    };
+
+    ctx.update = [&]() {
         /*********************************
          * RENDERING
          *********************************/
@@ -259,50 +212,45 @@ int          main()
 
         /* *** LIGHT *** */
         shader3D.use();
-        if (timeLight >= timer + 500)
-        {
-            // lightSun  = Light(glm::vec3(randGen.exponential(lambda)));
-            timeLight = 0;
-        }
-        timeLight++;
-        sparkState          = markovChain.nextState(sparkState);
-        sparkDirectionState = markovChain.nextState(sparkDirectionState);
+        sparkState       = markovChain.nextState(sparkState);
+        playerLightState = static_cast<float>(markovChain.nextState(static_cast<int>(playerLightState)));
         lightPlayer.passToShader(shader3D, glm::vec3(148.0f / 255.0f, 203.0f / 255.0f, 246.0f / 255.0f), ProjMatrix, viewMatrix, glm::vec3(0.f));
         lightBoid.passToShader2(shader3D, glm::vec3(80.0f, 0.f, 50.f), ProjMatrix, viewMatrix, player.getPosition());
 
         if (time >= timer)
         {
             time = 0;
-            if (sparkState == static_cast<int>(MarkovChainTextureState::Texture1))
+            if (sparkState == static_cast<int>(MarkovChainSparkState::TextureUpdate))
             {
-                currentTexture = textures[randGen.hypergeometric(textures.size(), 3, 1)];
+                currentTexture = textures[RNGenerator::hypergeometric(static_cast<int>(textures.size()), 2, 1)];
             }
             else
             {
-                indexTextures = static_cast<int>(randGen.normal(2.5, 2)) % textures.size();
-                if (indexTextures < 0)
-                    indexTextures += textures.size();
-                currentTexture = textures[indexTextures];
+                sparkMatrix = glm::vec3(RNGenerator::normal(2.5, 2), RNGenerator::normal(2.5, 2), RNGenerator::normal(2.5, 2));
             }
-            if (sparkState == static_cast<int>(MarkovChainDirection::RandomPosition))
-                sparkMatrix = glm::vec3(randGen.normal(2.5, 2), randGen.normal(2.5, 2), randGen.normal(2.5, 2));
+            if (sparkState == static_cast<int>(MarkovChainLightState::LightOn))
+            {
+                lightPlayer = Light(glm::vec3(static_cast<float>(RNGenerator::exponential(0.1))));
+            }
             else
-                sparkMatrix = glm::vec3(0.0f, 0.0f, 0.0f);
-            timer = randGen.geometric(0.01);
+            {
+                lightPlayer = Light(glm::vec3(80.f));
+            }
+            timer = RNGenerator::geometric(0.01);
         }
         time++;
         spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);
-        for (auto rockPosition : planetsData)
+        for (auto planetPosition : planetsData)
         {
-            rock.draw(glm::vec3{rockPosition[0], rockPosition[1], rockPosition[2]}, glm::vec3{rockPosition[3]}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, rockBake);
+            planet.draw(glm::vec3{planetPosition[0], planetPosition[1], planetPosition[2]}, glm::vec3{planetPosition[3]}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, planetBake);
         }
 
         player3D.draw(player.getPosition(), glm::vec3{1.}, -100, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, shader3D, playerBake);
 
-        for (Boid& b : simulation.getBoids())
+        for (Boid& boid : simulation.getBoids())
         {
             shader3D.use();
-            boids3D.draw(b.getPosition(), glm::vec3{3.}, b.getAngle(), glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, boidBake);
+            boids3D.draw(boid.getPosition(), glm::vec3{3.}, boid.getAngle(), glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, boidBake);
         }
         shaderCube.use();
         cube.draw(cube.getPosition(), glm::vec3{1}, shaderCube, viewMatrix, ProjMatrix);
