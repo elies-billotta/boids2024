@@ -5,8 +5,6 @@ in vec3 vPosition_vs;
 in vec3 vNormal_vs;
 in vec2 vTexCoords;
 
-vec2 fCorrectCoords;
-
 out vec4 fFragColor;
 
 uniform sampler2D uText;

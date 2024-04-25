@@ -15,6 +15,19 @@ void Light::setIntensity(const glm::vec3& intensity)
     m_intensity = intensity;
 }
 
+glm::vec3 Light::getIntensity()
+{
+    return m_intensity;
+}
+
+void Light::passToShader2(Program& shader, glm::vec3 intensity, glm::mat4 projMatrix, glm::mat4 viewMatrix, glm::vec3 playerPosition)
+{
+    intensity = intensity * this->m_intensity;
+
+    shader.uniform3fv("uLightPos2_vs", playerPosition);
+    shader.uniform3fv("uLightIntensity2", intensity);
+}
+
 void Light::passToShader(Program& shader, glm::vec3 intensity, glm::mat4 projMatrix, glm::mat4 viewMatrix, glm::vec3 playerPosition)
 {
     intensity = intensity * this->m_intensity;

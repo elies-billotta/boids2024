@@ -1,7 +1,7 @@
 #include "simulation.hpp"
 
 // Constructor
-Simulation::Simulation(int N, float areaSize, float size, glm::vec3 positionCube)
+Simulation::Simulation(int N, float areaSize, float size, glm::vec3 positionCube, float scope)
 {
     glm::vec3 position = {0., 1., -10.};
     glm::vec3 velocity = {0.5f, 0.5f, 0.2f};
@@ -21,19 +21,20 @@ Simulation::Simulation(int N, float areaSize, float size, glm::vec3 positionCube
         this->m_boids.emplace_back(position, velocity, direction, randomAngle);
         m_sizeBoid     = size;
         m_positionCube = positionCube;
+        m_scope        = scope;
     }
 }
 
 void Simulation::draw(p6::Context& ctx)
 {
-    for (Boid& b : this->m_boids)
+    /*for (Boid& b : this->m_boids)
     {
         ctx.stroke = p6::Color{0.0f, 0.0f, 0.0f};
         ctx.circle(p6::Center(b.getPosition().x, b.getPosition().y), p6::Radius(m_sizeBoid));
         // to see the scope of the boids
         ctx.stroke = p6::Color{1.0f, 0.0f, 0.0f};
         ctx.circle(p6::Center(b.getPosition().x, b.getPosition().y), p6::Radius(m_sizeBoid + m_boidScope));
-    }
+    }*/
 }
 
 void Simulation::simulate(float areaSize, bool check)
@@ -42,13 +43,13 @@ void Simulation::simulate(float areaSize, bool check)
     {
         b.move();
         if (check)
-            b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength, m_boidScope, m_positionCube);
+            b.bounce(areaSize, m_sizeBoid, m_strengths.boundsStrength, m_scope, m_positionCube);
         else
             b.noBounce(areaSize, m_positionCube);
 
-        separation(b, m_boidScope, m_strengths.separationStrength);
-        cohesion(b, m_boidScope, m_strengths.cohesionStrength);
-        alignement(b, m_boidScope, m_strengths.alignementStrength);
+        separation(b, m_scope, m_strengths.separationStrength);
+        cohesion(b, m_scope, m_strengths.cohesionStrength);
+        alignement(b, m_scope, m_strengths.alignementStrength);
     }
 }
 

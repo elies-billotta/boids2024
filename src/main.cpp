@@ -45,9 +45,10 @@ int main()
      *********************************/
     Player player(glm::vec3(0.f, 0.f, 0.f));
     Camera camera(player.getPosition());
+    float  scope = 1.5f;
 
     Cube       cube(20.0f, player.getPosition());
-    Simulation simulation = Simulation(N, cube.getSize(), 0.03f, player.getPosition());
+    Simulation simulation = Simulation(N, cube.getSize(), 0.03f, player.getPosition(), scope);
     ImVec4     namedColor = ImVec4(0.4f, 0.7f, 0.0f, 1.0f);
     bool       check      = false;
 
@@ -65,20 +66,13 @@ int main()
     /*********************************
      * 3D INITIALIZATION
      *********************************/
-
-    // SHADER
-    /*const p6::Shader shader = p6::load_shader(
-        "../src/shaders/3D.vs.glsl",
-        "../src/shaders/normals.fs.glsl"
-    );*/
-
     Program shader3D("../src/shaders/3D.vs.glsl", "../src/shaders/3D.fs.glsl");
     Program shaderCube("../src/shaders/cube.vs.glsl", "../src/shaders/cube.fs.glsl");
 
     img::Image imgBackground = p6::load_image_buffer("../assets/texture/background.png");
     img::Image imgPlayer     = p6::load_image_buffer("../assets/texture/player.png");
     img::Image imgBoid       = p6::load_image_buffer("../assets/texture/boid.jpg");
-    img::Image imgRock       = p6::load_image_buffer("../assets/texture/rock.png");
+    img::Image imgRock       = p6::load_image_buffer("../assets/texture/planet.jpg");
 
     // UNIFORM VARIABLE
     shader3D.addUniformVariable("uMVPMatrix");
@@ -107,7 +101,7 @@ int main()
     // LOAD 3D MODEL
     player3D.loadModel("player.obj");
     boids3D.loadModel("star.obj");
-    rock.loadModel("rock.obj");
+    rock.loadModel("planet.obj");
 
     GLuint playerBake;
     glGenTextures(1, &playerBake);
@@ -157,27 +151,28 @@ int main()
     ProjMatrix = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
 
     /* *** LIGHTS *** */
-    Light lightPlayer = Light(glm::vec3(80.f));
+    Light lightPlayer = Light(glm::vec3(60.f));
+    Light lightBoid   = Light(glm::vec3(1.f));
 
     // RANDOM
     RandomVariableGenerator randGen;
 
     // ROCKS
     float rockSize;
-    int   nbRock = randGen.uniformDiscrete(1, 10);
+    int   nbRock = randGen.uniformDiscrete(1, 6);
     // Taille de votre cube
     float cubeSize = 5.0f;
     // Position des rochers générés aléatoirement
     std::vector<glm::vec3> rockPositions;
     for (int i = 0; i < nbRock; i++)
     {
-        rockSize = static_cast<float>(randGen.normal(0.3, 0.01));
+        rockSize = static_cast<float>(randGen.normal(0.2, 0.1));
         if (rockSize < 0.)
             rockSize = -rockSize;
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
-        float x = randGen.triangular(-cubeSize / 2, 4, cubeSize / 2);
-        float y = randGen.triangular(-cubeSize / 2, 0, cubeSize / 2);
-        float z = randGen.triangular(-cubeSize / 2, 0, cubeSize / 2);
+        float x = randGen.triangular(-cubeSize * 2, 4, cubeSize * 2) + 0.5;
+        float y = randGen.triangular(-cubeSize * 2, 0, cubeSize * 2) + 0.5;
+        float z = randGen.triangular(-cubeSize * 2, 0, cubeSize * 2) + 0.5;
         // Ajouter la position du rocher à la liste
         rockPositions.emplace_back(x, y, z);
     }
@@ -202,8 +197,8 @@ int main()
         /* *** LIGHT *** */
         shader3D.use();
 
-        std::cout << "PLayer position " << player.getPosition().x << " " << player.getPosition().y << " " << player.getPosition().z << std::endl;
         lightPlayer.passToShader(shader3D, glm::vec3(148.0f / 255.0f, 203.0f / 255.0f, 246.0f / 255.0f), ProjMatrix, viewMatrix, glm::vec3(0.f));
+        lightBoid.passToShader2(shader3D, glm::vec3(80.0f, 0.f, 50.f), ProjMatrix, viewMatrix, player.getPosition());
 
         // Dessiner chaque rocher à sa position respective
         for (const auto& position : rockPositions)
@@ -214,15 +209,12 @@ int main()
 
         for (Boid& b : simulation.getBoids())
         {
+            shader3D.use();
             boids3D.draw(b.getPosition(), glm::vec3{3.}, b.getAngle(), glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, boidBake);
         }
         shaderCube.use();
 
         cube.draw(cube.getPosition(), glm::vec3{1}, shaderCube, viewMatrix, ProjMatrix);
-
-        /*glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-
-        glBindVertexArray(0);*/
     };
 
     // Should be done last. It starts the infinite loop.
