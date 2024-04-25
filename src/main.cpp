@@ -239,7 +239,7 @@ int          main()
     MarkovChain markovChain(transitionMatrix, states, randGen);
 
     int   sparkState          = static_cast<int>((MarkovChainSparkState::TextureUpdate));
-    float sparkDirectionState = static_cast<float>((MarkovChainLightState::LightOn));
+    float playerLightState = static_cast<float>((MarkovChainLightState::LightOn));
 
     glEnable(GL_DEPTH_TEST);
     glm::vec3 sparkMatrix    = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -266,7 +266,7 @@ int          main()
         }
         timeLight++;
         sparkState          = markovChain.nextState(sparkState);
-        sparkDirectionState = markovChain.nextState(sparkDirectionState);
+        playerLightState = markovChain.nextState(playerLightState);
         lightPlayer.passToShader(shader3D, glm::vec3(148.0f / 255.0f, 203.0f / 255.0f, 246.0f / 255.0f), ProjMatrix, viewMatrix, glm::vec3(0.f));
         lightBoid.passToShader2(shader3D, glm::vec3(80.0f, 0.f, 50.f), ProjMatrix, viewMatrix, player.getPosition());
 
