@@ -209,7 +209,8 @@ int          main()
 
     // ROCKS
     float rockSize;
-    int   nbRock = randGen.uniformDiscrete(1, 100);
+    int   nbRock = randGen.triangular(1, 5, 10);
+    ;
     // Taille de votre cube
     float cubeSize = 5.0f;
     // Position des rochers générés aléatoirement
@@ -220,9 +221,9 @@ int          main()
         if (rockSize < 0.)
             rockSize = -rockSize;
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
-        float x = randGen.triangular(-cubeSize * 2, cubeSize * 2, cubeSize * 2);
-        float y = randGen.triangular(-cubeSize * 2, cubeSize * 2, cubeSize * 2);
-        float z = randGen.triangular(-cubeSize * 2, cubeSize * 2, cubeSize * 2);
+        float x = randGen.uniformDiscrete(-cubeSize, cubeSize);
+        float y = randGen.uniformDiscrete(-cubeSize, cubeSize);
+        float z = randGen.uniformDiscrete(-cubeSize, cubeSize);
 
         // Ajouter la position du rocher à la liste
         rockPositions.emplace_back(x, y, z);
@@ -230,11 +231,13 @@ int          main()
 
     // MARKOV CHAIN
     // Créer une matrice de transition pour gérer les changements d'état entre "Texture1" et "Texture2"
+    // Création de la matrice de transition avec des probabilités plus élevées pour le changement de couleur
+    // Création de la matrice de transition avec des probabilités plus élevées pour le changement de couleur
     std::vector<std::vector<double>> transitionMatrix = {
-        {0.9, 0.1, 0.0, 0.0}, // Probabilités de transition de l'état 0 vers les autres états
-        {0.1, 0.0, 0.0, 0.0}, // Probabilités de transition de l'état 1 vers les autres états
-        {0.0, 0.0, 0.3, 0.0}, // Probabilités de transition de l'état 2 vers les autres états
-        {0.0, 0.4, 0.2, 0.4}  // Probabilités de transition de l'état 3 vers les autres états
+        {0.9, 0.25, 0.025, 0.025}, // Probabilités de transition de l'état 0 vers les autres états
+        {0.25, 0.9, 0.025, 0.025}, // Probabilités de transition de l'état 1 vers les autres états
+        {0.025, 0.025, 0.8, 0.15}, // Probabilités de transition de l'état 2 vers les autres états
+        {0.025, 0.025, 0.15, 0.8}  // Probabilités de transition de l'état 3 vers les autres états
     };
 
     std::unordered_map<int, GLuint> textureMap = {
@@ -247,8 +250,8 @@ int          main()
     // markovChain constructor
     MarkovChain markovChain(transitionMatrix, states, randGen);
 
-    int   sparkState          = static_cast<int>((MarkovChainTextureState::Texture1)); // Supposons que 0 est l'état initial
-    float sparkDirectionState = static_cast<float>((MarkovChainDirection::Left));      // Supposons que 0 est l'état initial
+    int   sparkState          = static_cast<int>((MarkovChainTextureState::Texture1));      // Supposons que 0 est l'état initial
+    float sparkDirectionState = static_cast<float>((MarkovChainDirection::RandomPosition)); // Supposons que 0 est l'état initial
 
     glEnable(GL_DEPTH_TEST);
     glm::vec3 sparkMatrix = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -296,14 +299,15 @@ int          main()
             else
             {
                 indexTextures = static_cast<int>(randGen.normal(2.5, 2)) % textures.size();
-                if (indexTextures < 0) indexTextures += textures.size();
+                if (indexTextures < 0)
+                    indexTextures += textures.size();
                 currentTexture = textures[indexTextures];
             }
-            if (sparkState == static_cast<int>(MarkovChainDirection::Left))
-                sparkMatrix = glm::vec3(-1.0f, 0.0f, 0.0f);
+            if (sparkState == static_cast<int>(MarkovChainDirection::RandomPosition))
+                sparkMatrix = glm::vec3(randGen.normal(2.5, 2), randGen.normal(2.5, 2), randGen.normal(2.5, 2));
             else
-                sparkMatrix = glm::vec3(1.0f, 0.0f, 0.0f);
-            timer = randGen.geometric(0.1);
+                sparkMatrix = glm::vec3(0.0f, 0.0f, 0.0f);
+            timer = randGen.geometric(0.01);
         }
         time++;
         spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);

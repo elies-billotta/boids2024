@@ -10,8 +10,8 @@ enum class MarkovChainTextureState {
 };
 
 enum class MarkovChainDirection {
-    Left,
-    Right
+    Center,
+    RandomPosition
 };
 
 class MarkovChain {
