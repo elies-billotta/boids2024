@@ -22,7 +22,7 @@ glm::vec3 Camera::getPosition()
 glm::vec3 Camera::setPosition(glm::vec3 posPlayer, glm::mat4 playerRotation, float phi, float theta)
 {
     m_Theta = theta;
-    // m_Phi   = phi;
+    m_Phi   = phi;
 
     m_position = posPlayer + glm::vec3(0.0f, 0.0f, 7.0f);
 

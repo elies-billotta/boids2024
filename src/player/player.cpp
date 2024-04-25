@@ -71,9 +71,10 @@ void Player::move(const p6::Context& ctx, Camera& camera, Cube& cube)
     if (ctx.mouse() != m_oldMouse)
     {
         float mouseDeltaX = ctx.mouse().x - m_oldMouse.x;
+        float mouseDeltaY = ctx.mouse().y - m_oldMouse.y;
 
         m_Theta += mouseDeltaX * m_sensitivity;
-        m_Phi -= 0;
+        m_Phi -= mouseDeltaY * m_sensitivity;
 
         m_rotMatrix = glm::rotate(glm::mat4(1.0f), m_Theta, glm::vec3(0.0f, -1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), m_Phi, glm::vec3(1.0f, 0.0f, 0.0f));
 
