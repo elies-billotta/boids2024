@@ -195,30 +195,30 @@ int          main()
     ProjMatrix = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
 
     /* *** LIGHTS *** */
-    Light lightPlayer = Light(glm::vec3(randGen.exponential(lambda)));
+    Light lightPlayer = Light(glm::vec3(80.f));
     Light lightBoid   = Light(glm::vec3(1.f));
 
     // RANDOM
     RandomVariableGenerator randGen;
 
     // ROCKS
-    float rockSize;
-    int   nbRock = randGen.triangular(1, 5, 10);
+    int nbRock = randGen.triangular(1, 5, 10);
     // Taille de votre cube
     float cubeSize = 5.0f;
     // Position des rochers générés aléatoirement
-    std::vector<glm::vec3> rockPositions;
+    std::vector<glm::vec4> planetsData;
+    std::cout << "nbRock : " << nbRock << std::endl;
     for (int i = 0; i < nbRock; i++)
     {
-        rockSize = static_cast<float>(abs(randGen.laplace(2., 1.)));
-        if (rockSize < 0.)
-            rockSize = -rockSize;
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
-        float x = randGen.uniformDiscrete(-cubeSize, cubeSize);
-        float y = randGen.uniformDiscrete(-cubeSize, cubeSize);
-        float z = randGen.uniformDiscrete(-cubeSize, cubeSize);
+        float x          = randGen.uniformDiscrete(-cubeSize, cubeSize);
+        float y          = randGen.uniformDiscrete(-cubeSize, cubeSize);
+        float z          = randGen.uniformDiscrete(-cubeSize, cubeSize);
+        float planetSize = static_cast<float>(randGen.laplace(0.1, 0.2));
+        if (planetSize < 0)
+            planetSize = -planetSize;
         // Ajouter la position du rocher à la liste
-        rockPositions.emplace_back(x, y, z);
+        planetsData.emplace_back(x, y, z, planetSize);
     }
 
     // MARKOV CHAIN
@@ -242,11 +242,11 @@ int          main()
     float sparkDirectionState = static_cast<float>((MarkovChainDirection::RandomPosition));
 
     glEnable(GL_DEPTH_TEST);
-    glm::vec3 sparkMatrix = glm::vec3(0.0f, 0.0f, 0.0f);
-    int    time           = 0;
-    int    timeLight      = 0;
-    GLuint currentTexture = sparkBake1;
-    ctx.update            = [&]() {
+    glm::vec3 sparkMatrix    = glm::vec3(0.0f, 0.0f, 0.0f);
+    int       time           = 0;
+    int       timeLight      = 0;
+    GLuint    currentTexture = sparkBake1;
+    ctx.update               = [&]() {
         /*********************************
          * RENDERING
          *********************************/
@@ -261,14 +261,14 @@ int          main()
         shader3D.use();
         if (timeLight >= timer + 500)
         {
-           // lightSun  = Light(glm::vec3(randGen.exponential(lambda)));
-           timeLight = 0;
-           lightPlayer.passToShader(shader3D, glm::vec3(148.0f / 255.0f, 203.0f / 255.0f, 246.0f / 255.0f), ProjMatrix, viewMatrix, glm::vec3(0.f));
-           lightBoid.passToShader2(shader3D, glm::vec3(80.0f, 0.f, 50.f), ProjMatrix, viewMatrix, player.getPosition());
+            // lightSun  = Light(glm::vec3(randGen.exponential(lambda)));
+            timeLight = 0;
         }
         timeLight++;
         sparkState          = markovChain.nextState(sparkState);
         sparkDirectionState = markovChain.nextState(sparkDirectionState);
+        lightPlayer.passToShader(shader3D, glm::vec3(148.0f / 255.0f, 203.0f / 255.0f, 246.0f / 255.0f), ProjMatrix, viewMatrix, glm::vec3(0.f));
+        lightBoid.passToShader2(shader3D, glm::vec3(80.0f, 0.f, 50.f), ProjMatrix, viewMatrix, player.getPosition());
 
         if (time >= timer)
         {
@@ -292,9 +292,9 @@ int          main()
         }
         time++;
         spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);
-        for (auto rockPosition : rockPositions)
+        for (auto rockPosition : planetsData)
         {
-            rock.draw(rockPosition, glm::vec3{rockSize}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, rockBake);
+            rock.draw(glm::vec3{rockPosition[0], rockPosition[1], rockPosition[2]}, glm::vec3{rockPosition[3]}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, rockBake);
         }
 
         player3D.draw(player.getPosition(), glm::vec3{1.}, -100, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, shader3D, playerBake);
