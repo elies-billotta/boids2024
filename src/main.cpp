@@ -150,17 +150,17 @@ int main()
     RandomVariableGenerator randGen;
 
     // PLANETS
-    int nbRock = randGen.triangular(1, 5, 10);
+    int nbPlanets = randGen.triangular(1, 5, 10);
     // Taille de votre cube
     // Position des rochers générés aléatoirement
     std::vector<glm::vec4> planetsData;
-    std::cout << "nbRock : " << nbRock << std::endl;
-    for (int i = 0; i < nbRock; i++)
+    std::cout << "nbPlanets : " << nbPlanets << std::endl;
+    for (int i = 0; i < nbPlanets; i++)
     {
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
-        float x          = randGen.uniformDiscrete(-areaSize, areaSize);
-        float y          = randGen.uniformDiscrete(-areaSize, areaSize);
-        float z          = randGen.uniformDiscrete(-areaSize, areaSize);
+        float x          = randGen.uniformDiscrete(-areaSize+1, areaSize-1);
+        float y          = randGen.uniformDiscrete(-areaSize+1, areaSize-1);
+        float z          = randGen.uniformDiscrete(-areaSize+1, areaSize-1);
         float planetSize = static_cast<float>(randGen.laplace(0.1, 0.2));
         if (planetSize < 0)
             planetSize = -planetSize;
@@ -203,9 +203,7 @@ int main()
 
     ctx.imgui = [&]() {
         ImGui::Begin("Test");
-        // ImGui::SliderFloat("Square size", &areaSize, 0.f, 1.f);
-        // ImGui::ColorPicker4("Color", (float*)&namedColor);
-        ImGui::SliderInt("Number of Boids", &nbBoids, 50, 200);
+        ImGui::SliderInt("Number of planets", &nbPlanets, 50, 200);
         ImGui::Checkbox("Bounce", &check);
         ImGui::SliderFloat("Separation", simulation.getSeparationStrength(), 0.f, 0.5f);
         ImGui::SliderFloat("Cohesion", simulation.getCohesionStrength(), 0.f, 0.5f);
