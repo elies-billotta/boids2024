@@ -1,7 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include "glm/gtc/constants.hpp"
+#include "glm/fwd.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "p6/p6.h"
 
 class Camera {
 public:
@@ -13,7 +15,7 @@ public:
     glm::vec3 getPosition();
 
     /* *** SETTERS *** */
-    glm::vec3 setPosition(glm::vec3 posPlayer);
+    glm::vec3 setPosition(glm::vec3 posPlayer, glm::mat4 playerRotation, float phi, float theta);
 
 private:
     glm::vec3 m_position;

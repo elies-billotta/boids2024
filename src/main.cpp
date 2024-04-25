@@ -37,7 +37,7 @@ int main()
     /*********************************
      * INITIALIZATION SIMULATION
      *********************************/
-    Player player(glm::vec3(0.f, 0.f, 0.f));
+    Player player(glm::vec3(0.f, 0.f, 0.f), ctx.mouse());
     Camera camera(player.getPosition());
     float  scope = 1.5f;
 
@@ -59,7 +59,7 @@ int main()
     img::Image imgSpark2     = p6::load_image_buffer("../assets/texture/spark2.png");
     img::Image imgSpark3     = p6::load_image_buffer("../assets/texture/spark3.png");
     img::Image imgSpark4     = p6::load_image_buffer("../assets/texture/spark4.png");
-    img::Image imgPlanet       = p6::load_image_buffer("../assets/texture/planet.jpg");
+    img::Image imgPlanet     = p6::load_image_buffer("../assets/texture/planet.jpg");
 
     // UNIFORM VARIABLE
     shader3D.addUniformVariable("uMVPMatrix");
@@ -93,7 +93,7 @@ int main()
     // TEXTURE
     GLuint              playerBake = TextureBaker::bake(imgPlayer);
     GLuint              boidBake   = TextureBaker::bake(imgBoid);
-    GLuint              planetBake   = TextureBaker::bake(imgPlanet);
+    GLuint              planetBake = TextureBaker::bake(imgPlanet);
     GLuint              sparkBake1 = TextureBaker::bake(imgSpark1);
     GLuint              sparkBake2 = TextureBaker::bake(imgSpark2);
     GLuint              sparkBake3 = TextureBaker::bake(imgSpark3);
@@ -245,7 +245,7 @@ int main()
             planet.draw(glm::vec3{planetPosition[0], planetPosition[1], planetPosition[2]}, glm::vec3{planetPosition[3]}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, planetBake);
         }
 
-        player3D.draw(player.getPosition(), glm::vec3{1.}, -100, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, shader3D, playerBake);
+        player.draw(player3D, glm::vec3{1.}, ProjMatrix, viewMatrix, shader3D, playerBake);
 
         for (Boid& boid : simulation.getBoids())
         {
@@ -261,12 +261,9 @@ int main()
 
     // delete 3D model
     player3D.~Model();
-
-    /*glDeleteTextures(1, &tex);
-    glDeleteBuffers(1, &vbo);
-    glDeleteVertexArrays(1, &vao);*/
     cube.~Cube();
 
+    // delete shaders
     shaderCube.~Program();
     shader3D.~Program();
 }
