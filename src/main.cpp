@@ -42,7 +42,7 @@ int main()
     float  scope = 1.5f;
 
     Cube       cube(areaSize, player.getPosition());
-    Simulation simulation = Simulation(nbBoids, cube.getSize(), 0.03f, player.getPosition(), scope);
+    Simulation simulation = Simulation(nbBoids, areaSize, player.getPosition(), scope);
     bool       check      = false;
     int        timer      = 30;
 
@@ -122,7 +122,7 @@ int main()
 
     // LIGHTS
     Light lightPlayer = Light(glm::vec3(80.f));
-    Light lightBoid   = Light(glm::vec3(1.f));
+    Light lightCenter   = Light(glm::vec3(1.f));
 
     // RANDOM
 
@@ -206,7 +206,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         /* *** MOVING PLAYER & BOIDS *** */
-        player.move(ctx, player, camera, cube);
+        player.move(ctx, camera, cube);
         simulation.simulate(cube.getSize(), check);
         glm::mat4 viewMatrix = camera.getViewMatrix();
 
@@ -215,7 +215,7 @@ int main()
         sparkState       = markovChain.nextState(sparkState);
         playerLightState = static_cast<float>(markovChain.nextState(static_cast<int>(playerLightState)));
         lightPlayer.passToShader(shader3D, glm::vec3(148.0f / 255.0f, 203.0f / 255.0f, 246.0f / 255.0f), ProjMatrix, viewMatrix, glm::vec3(0.f));
-        lightBoid.passToShader2(shader3D, glm::vec3(80.0f, 0.f, 50.f), ProjMatrix, viewMatrix, player.getPosition());
+        lightCenter.passToShader2(shader3D, glm::vec3(80.0f, 0.f, 50.f), ProjMatrix, viewMatrix, player.getPosition());
 
         if (time >= timer)
         {
@@ -230,13 +230,13 @@ int main()
             }
             if (sparkState == static_cast<int>(MarkovChainLightState::LightOn))
             {
-                lightPlayer = Light(glm::vec3(static_cast<float>(RNGenerator::exponential(0.1))));
+                lightCenter = Light(glm::vec3(static_cast<float>(RNGenerator::normal(1, 1))));
             }
             else
             {
-                lightPlayer = Light(glm::vec3(80.f));
+                lightCenter = Light(glm::vec3(1.f));
             }
-            timer = RNGenerator::geometric(0.01);
+            timer = static_cast<int>(RNGenerator::exponential(0.1));
         }
         time++;
         spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);

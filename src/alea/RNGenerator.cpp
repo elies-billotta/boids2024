@@ -1,4 +1,8 @@
 #include "RNGenerator.hpp"
+#include <stdexcept>
+
+// Votre code ici
+
 
 RNGenerator::RNGenerator()
 {
@@ -31,7 +35,7 @@ int RNGenerator::hypergeometric(int populationSize, int successStates, int sampl
     return count;
 }
 
-int RNGenerator::bernoulli(double p)
+ int RNGenerator::bernoulli(double p)
 {
     if (p < 0 || p > 1)
     {

@@ -9,26 +9,24 @@
 class Simulation {
 public:
     // Constructor
-    Simulation(int N, float areaSize, float size, glm::vec3 positionCube, float scope);
+    Simulation(int nbBoids, float areaSize, glm::vec3 positionCube, float scope);
 
     // Methods
     void draw(p6::Context& ctx);
     void simulate(float areaSize, bool check);
 
     // GETTERS
-    std::vector<Boid> getBoids();
+    std::vector<Boid> getBoids() const;
     float*            getSeparationStrength();
     float*            getCohesionStrength();
     float*            getAlignementStrength();
 
 private:
-    void separation(Boid& currentBoid, const float scope, const float strength);
-    // void      cohesion(Boid& currentBoid, const float scope, const float strength);
-    void              cohesion(Boid& currentBoid, const float scope, const float strength);
-    void              alignement(Boid& currentBoid, const float scope, const float strength);
+    void              separation(float scope, Boid& currentBoid, float strength);
+    void              cohesion(float scope, Boid& currentBoid, float strength);
+    void              alignement(float scope, Boid& currentBoid, float strength);
     std::vector<Boid> m_boids;
     glm::vec3         m_positionCube;
-    float             m_sizeBoid;
     Strengths         m_strengths;
     float             m_scope;
     float             m_wallsScope;

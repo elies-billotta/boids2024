@@ -1,8 +1,6 @@
 #pragma once
 
-#include <string>
 #include <vector>
-#include "RNGenerator.hpp" // Inclure la déclaration de RandomVariableGenerator
 
 enum class MarkovChainSparkState {
     TextureUpdate,

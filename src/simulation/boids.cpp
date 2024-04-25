@@ -30,7 +30,7 @@ void Boid::noBounce(float areaSize, glm::vec3 positionCube)
 }
 
 // The boids bounce against the walls
-void Boid::bounce(float& areaSize, const float& size, const float& strength, const float& scope, glm::vec3 positionCube)
+void Boid::bounce(float& areaSize, const float& strength, glm::vec3 positionCube, const float& scope)
 {
     glm::vec3   boundsForce;
     const float maxX = areaSize;
@@ -75,17 +75,17 @@ void Boid::bounce(float& areaSize, const float& size, const float& strength, con
 }
 
 // GETTERS
-glm::vec3 Boid::getPosition()
+glm::vec3 Boid::getPosition() const
 {
     return m_position;
 }
 
-glm::vec3 Boid::getDirection()
+glm::vec3 Boid::getDirection() const
 {
     return m_direction;
 }
 
-float Boid::getAngle()
+float Boid::getAngle() const
 {
     return m_angle;
 }

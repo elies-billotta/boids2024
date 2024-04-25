@@ -1,11 +1,11 @@
 #pragma once
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+#include <glm/glm.hpp>
+#include "glm/gtc/constants.hpp"
 
 class Camera {
 public:
-    Camera(glm::vec3 posPlayer);
+    explicit Camera(glm::vec3 posPlayer);
 
     glm::mat4 getViewMatrix() const;
 
