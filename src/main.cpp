@@ -44,7 +44,7 @@ int main()
     Cube       cube(areaSize, player.getPosition());
     Simulation simulation = Simulation(nbBoids, areaSize, player.getPosition(), scope);
     bool       check      = false;
-    int        timer      = 30;
+    int        timer      = RNGenerator::geometric(0.1);
 
     /*********************************
      * 3D INITIALIZATION
@@ -122,7 +122,7 @@ int main()
 
     // LIGHTS
     Light lightPlayer = Light(glm::vec3(80.f));
-    Light lightCenter   = Light(glm::vec3(1.f));
+    Light lightCenter = Light(glm::vec3(3.f));
 
     // RANDOM
 
@@ -236,7 +236,7 @@ int main()
             {
                 lightCenter = Light(glm::vec3(1.f));
             }
-            timer = static_cast<int>(RNGenerator::exponential(0.1));
+            timer = static_cast<int>(RNGenerator::exponential(0.07));
         }
         time++;
         spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);

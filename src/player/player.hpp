@@ -5,6 +5,7 @@
 #include "../src/camera/camera.hpp"
 #include "../src/render/cube.hpp"
 #include "glm/fwd.hpp"
+#include "render/model.hpp"
 
 class Player {
 public:

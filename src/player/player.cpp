@@ -1,6 +1,5 @@
-#include <cmath>
-
 #include "../src/player/player.hpp"
+#include <cmath>
 
 Player::Player(glm::vec3 pos, glm::vec2 mouse)
     : m_pos(pos), m_Phi(p6::PI), m_Theta(0.)
@@ -57,11 +56,11 @@ void Player::move(const p6::Context& ctx, Camera& camera, Cube& cube)
         savePos += -m_speed * m_LeftVector;
     }
 
-    if (ctx.key_is_pressed(GLFW_KEY_C))
+    if (ctx.key_is_pressed(GLFW_KEY_SPACE))
     {
         savePos += m_speed * m_UpVector;
     }
-    if (ctx.key_is_pressed(GLFW_KEY_SPACE))
+    if (ctx.key_is_pressed(GLFW_KEY_C))
     {
         savePos += -m_speed * m_UpVector;
     }
