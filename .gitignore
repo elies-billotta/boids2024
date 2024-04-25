@@ -5,7 +5,7 @@
 *.slo
 *.lo
 *.o
-*.obj
+tinyobjloader/models
 
 # Precompiled Headers
 *.gch
