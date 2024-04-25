@@ -4,14 +4,14 @@
 #include <vector>
 #include "RandomVariableGenerator.hpp" // Inclure la déclaration de RandomVariableGenerator
 
-enum class MarkovChainTextureState {
-    Texture1,
-    Texture2
+enum class MarkovChainSparkState {
+    TextureUpdate,
+    PositionUpdate
 };
 
-enum class MarkovChainDirection {
-    Center,
-    RandomPosition
+enum class MarkovChainLightState {
+    LightOff,
+    LightOn
 };
 
 class MarkovChain {

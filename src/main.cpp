@@ -230,16 +230,16 @@ int          main()
     };
 
     std::unordered_map<int, GLuint> textureMap = {
-        {static_cast<int>(MarkovChainTextureState::Texture1), sparkBake1},
-        {static_cast<int>(MarkovChainTextureState::Texture2), sparkBake2}
+        {static_cast<int>(MarkovChainSparkState::TextureUpdate), sparkBake1},
+        {static_cast<int>(MarkovChainSparkState::PositionUpdate), sparkBake2}
     };
 
-    std::vector<int> states = {static_cast<int>(MarkovChainTextureState::Texture1), static_cast<int>(MarkovChainTextureState::Texture2)};
+    std::vector<int> states = {static_cast<int>(MarkovChainSparkState::TextureUpdate), static_cast<int>(MarkovChainSparkState::PositionUpdate)};
 
     MarkovChain markovChain(transitionMatrix, states, randGen);
 
-    int   sparkState          = static_cast<int>((MarkovChainTextureState::Texture1));
-    float sparkDirectionState = static_cast<float>((MarkovChainDirection::RandomPosition));
+    int   sparkState          = static_cast<int>((MarkovChainSparkState::TextureUpdate));
+    float sparkDirectionState = static_cast<float>((MarkovChainLightState::LightOn));
 
     glEnable(GL_DEPTH_TEST);
     glm::vec3 sparkMatrix    = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -273,21 +273,22 @@ int          main()
         if (time >= timer)
         {
             time = 0;
-            if (sparkState == static_cast<int>(MarkovChainTextureState::Texture1))
+            if (sparkState == static_cast<int>(MarkovChainSparkState::TextureUpdate))
             {
                 currentTexture = textures[randGen.hypergeometric(textures.size(), 3, 1)];
             }
             else
             {
-                indexTextures = static_cast<int>(randGen.normal(2.5, 2)) % textures.size();
-                if (indexTextures < 0)
-                    indexTextures += textures.size();
-                currentTexture = textures[indexTextures];
+               sparkMatrix = glm::vec3(randGen.normal(2.5, 2), randGen.normal(2.5, 2), randGen.normal(2.5, 2));
             }
-            if (sparkState == static_cast<int>(MarkovChainDirection::RandomPosition))
-                sparkMatrix = glm::vec3(randGen.normal(2.5, 2), randGen.normal(2.5, 2), randGen.normal(2.5, 2));
+            if (sparkState == static_cast<int>(MarkovChainLightState::LightOn))
+            {
+                lightPlayer = Light(glm::vec3(randGen.exponential(lambda)));
+            }
             else
-                sparkMatrix = glm::vec3(0.0f, 0.0f, 0.0f);
+            {
+                lightPlayer = Light(glm::vec3(80.f));
+            }
             timer = randGen.geometric(0.01);
         }
         time++;
