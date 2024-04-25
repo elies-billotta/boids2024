@@ -5,6 +5,7 @@
 #include "glm/fwd.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "glpp/glpp.hpp"
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "../src-common/glimac/common.hpp"
 #include "../src-common/glimac/cone_vertices.hpp"
@@ -29,8 +30,9 @@ const int       N     = 100;
 const float     speed = 0.01f;
 const glm::vec3 posPlayer(0., 0., 0.);
 // const glm::vec3 posCube(0., -5., -5.);
-int    timer  = 30;
-const double lambda = 0.1;
+int          timer         = 30;
+const double lambda        = 0.1;
+int          indexTextures = 0;
 int          main()
 {
     // Run the tests
@@ -84,6 +86,8 @@ int          main()
     img::Image imgRock       = p6::load_image_buffer("../assets/texture/rock.png");
     img::Image imgSpark1     = p6::load_image_buffer("../assets/texture/spark1.png");
     img::Image imgSpark2     = p6::load_image_buffer("../assets/texture/spark2.png");
+    img::Image imgSpark3     = p6::load_image_buffer("../assets/texture/spark3.png");
+    img::Image imgSpark4     = p6::load_image_buffer("../assets/texture/spark4.png");
 
     // UNIFORM VARIABLE
     shader3D.addUniformVariable("uMVPMatrix");
@@ -119,7 +123,6 @@ int          main()
     GLuint playerBake;
     glGenTextures(1, &playerBake);
     glBindTexture(GL_TEXTURE_2D, playerBake);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgPlayer.width(), imgPlayer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgPlayer.data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -128,7 +131,6 @@ int          main()
     GLuint boidBake;
     glGenTextures(1, &boidBake);
     glBindTexture(GL_TEXTURE_2D, boidBake);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgBoid.width(), imgBoid.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBoid.data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -137,13 +139,13 @@ int          main()
     GLuint rockBake;
     glGenTextures(1, &rockBake);
     glBindTexture(GL_TEXTURE_2D, rockBake);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgRock.width(), imgRock.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgRock.data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     GLuint sparkBake1, sparkBake2;
+    GLuint sparkBake3, sparkBake4;
     glGenTextures(1, &sparkBake1);
     glBindTexture(GL_TEXTURE_2D, sparkBake1);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark1.width(), imgSpark1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark1.data());
@@ -158,6 +160,24 @@ int          main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0); // Délier la texture
+
+    // Génération de la texture sparkBake2
+    glGenTextures(1, &sparkBake3);
+    glBindTexture(GL_TEXTURE_2D, sparkBake3);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark3.width(), imgSpark3.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark3.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0); // Délier la texture
+
+    // Génération de la texture sparkBake2
+    glGenTextures(1, &sparkBake4);
+    glBindTexture(GL_TEXTURE_2D, sparkBake4);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgSpark4.width(), imgSpark4.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgSpark4.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0); // Délier la texture
+
+    std::vector<GLuint> textures = {sparkBake1, sparkBake2, sparkBake3, sparkBake4};
 
     // VBO
     player3D.setVbo();
@@ -196,13 +216,13 @@ int          main()
     std::vector<glm::vec3> rockPositions;
     for (int i = 0; i < nbRock; i++)
     {
-        rockSize = static_cast<float>(randGen.normal(0.9, 0.1));
+        rockSize = static_cast<float>(abs(randGen.laplace(2., 1.)));
         if (rockSize < 0.)
             rockSize = -rockSize;
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
-        float x = randGen.triangular(-cubeSize*2, cubeSize*2, cubeSize*2);
-        float y = randGen.triangular(-cubeSize*2, cubeSize*2, cubeSize*2);
-        float z = randGen.triangular(-cubeSize*2, cubeSize*2, cubeSize*2);
+        float x = randGen.triangular(-cubeSize * 2, cubeSize * 2, cubeSize * 2);
+        float y = randGen.triangular(-cubeSize * 2, cubeSize * 2, cubeSize * 2);
+        float z = randGen.triangular(-cubeSize * 2, cubeSize * 2, cubeSize * 2);
 
         // Ajouter la position du rocher à la liste
         rockPositions.emplace_back(x, y, z);
@@ -254,10 +274,10 @@ int          main()
         shader3D.use();
         if (timeLight >= timer + 500)
         {
-            lightSun = Light(glm::vec3(randGen.exponential(lambda)));
+            lightSun  = Light(glm::vec3(randGen.exponential(lambda)));
             timeLight = 0;
         }
-        std::cout << "PLayer position " << player.getPosition().x << " " << player.getPosition().y << " " << player.getPosition().z << std::endl;
+        // std::cout << "PLayer position " << player.getPosition().x << " " << player.getPosition().y << " " << player.getPosition().z << std::endl;
         lightSun.passToShader(shader3D, ProjMatrix, viewMatrix, player.getPosition());
         timeLight++;
         // Utiliser la chaîne de Markov pour déterminer l'état actuel des sparks
@@ -267,20 +287,20 @@ int          main()
 
         if (time >= timer)
         {
-            time     = 0;
+            time = 0;
             // Mettre à jour la texture et la direction des sparks en fonction de leur état
             if (sparkState == static_cast<int>(MarkovChainTextureState::Texture1))
             {
-                currentTexture = sparkBake1;
+                currentTexture = textures[randGen.hypergeometric(textures.size(), 3, 1)];
             }
             else
             {
-                currentTexture = sparkBake2;
+                indexTextures = static_cast<int>(randGen.normal(2.5, 2)) % textures.size();
+                if (indexTextures < 0) indexTextures += textures.size();
+                currentTexture = textures[indexTextures];
             }
             if (sparkState == static_cast<int>(MarkovChainDirection::Left))
-            {
                 sparkMatrix = glm::vec3(-1.0f, 0.0f, 0.0f);
-            }
             else
                 sparkMatrix = glm::vec3(1.0f, 0.0f, 0.0f);
             timer = randGen.geometric(0.1);
