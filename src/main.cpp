@@ -244,8 +244,15 @@ int          main()
     glEnable(GL_DEPTH_TEST);
     glm::vec3 sparkMatrix    = glm::vec3(0.0f, 0.0f, 0.0f);
     int       time           = 0;
-    int       timeLight      = 0;
-    GLuint    currentTexture = sparkBake1;
+    GLuint    currentTexture;
+    if (randGen.bernoulli(0.5))
+    {
+       currentTexture = sparkBake1;
+    }
+    else {
+        currentTexture = sparkBake2;
+    }
+    
     ctx.update               = [&]() {
         /*********************************
          * RENDERING
@@ -259,12 +266,6 @@ int          main()
 
         /* *** LIGHT *** */
         shader3D.use();
-        if (timeLight >= timer + 500)
-        {
-            // lightSun  = Light(glm::vec3(randGen.exponential(lambda)));
-            timeLight = 0;
-        }
-        timeLight++;
         sparkState          = markovChain.nextState(sparkState);
         playerLightState = markovChain.nextState(playerLightState);
         lightPlayer.passToShader(shader3D, glm::vec3(148.0f / 255.0f, 203.0f / 255.0f, 246.0f / 255.0f), ProjMatrix, viewMatrix, glm::vec3(0.f));
@@ -275,7 +276,7 @@ int          main()
             time = 0;
             if (sparkState == static_cast<int>(MarkovChainSparkState::TextureUpdate))
             {
-                currentTexture = textures[randGen.hypergeometric(textures.size(), 3, 1)];
+                currentTexture = textures[randGen.hypergeometric(textures.size(), 2, 1)];
             }
             else
             {
