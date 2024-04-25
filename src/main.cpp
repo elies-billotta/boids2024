@@ -59,7 +59,7 @@ int main()
     img::Image imgSpark2     = p6::load_image_buffer("../assets/texture/spark2.png");
     img::Image imgSpark3     = p6::load_image_buffer("../assets/texture/spark3.png");
     img::Image imgSpark4     = p6::load_image_buffer("../assets/texture/spark4.png");
-    img::Image imgPlanet       = p6::load_image_buffer("../assets/texture/planet.jpg");
+    img::Image imgPlanet     = p6::load_image_buffer("../assets/texture/planet.jpg");
 
     // UNIFORM VARIABLE
     shader3D.addUniformVariable("uMVPMatrix");
@@ -93,7 +93,7 @@ int main()
     // TEXTURE
     GLuint              playerBake = TextureBaker::bake(imgPlayer);
     GLuint              boidBake   = TextureBaker::bake(imgBoid);
-    GLuint              planetBake   = TextureBaker::bake(imgPlanet);
+    GLuint              planetBake = TextureBaker::bake(imgPlanet);
     GLuint              sparkBake1 = TextureBaker::bake(imgSpark1);
     GLuint              sparkBake2 = TextureBaker::bake(imgSpark2);
     GLuint              sparkBake3 = TextureBaker::bake(imgSpark3);
