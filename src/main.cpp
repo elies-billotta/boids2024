@@ -6,7 +6,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "../src/render/light.hpp"
 #include "alea/MarkovChain.hpp"
-#include "alea/RandomVariableGenerator.hpp"
+#include "alea/RNGenerator.hpp"
 #include "camera/camera.hpp"
 #include "doctest/doctest.h"
 #include "player/player.hpp"
@@ -59,7 +59,7 @@ int main()
     img::Image imgSpark2     = p6::load_image_buffer("../assets/texture/spark2.png");
     img::Image imgSpark3     = p6::load_image_buffer("../assets/texture/spark3.png");
     img::Image imgSpark4     = p6::load_image_buffer("../assets/texture/spark4.png");
-    img::Image imgRock       = p6::load_image_buffer("../assets/texture/planet.jpg");
+    img::Image imgPlanet       = p6::load_image_buffer("../assets/texture/planet.jpg");
 
     // UNIFORM VARIABLE
     shader3D.addUniformVariable("uMVPMatrix");
@@ -93,7 +93,7 @@ int main()
     // TEXTURE
     GLuint              playerBake = TextureBaker::bake(imgPlayer);
     GLuint              boidBake   = TextureBaker::bake(imgBoid);
-    GLuint              rockBake   = TextureBaker::bake(imgRock);
+    GLuint              planetBake   = TextureBaker::bake(imgPlanet);
     GLuint              sparkBake1 = TextureBaker::bake(imgSpark1);
     GLuint              sparkBake2 = TextureBaker::bake(imgSpark2);
     GLuint              sparkBake3 = TextureBaker::bake(imgSpark3);
@@ -125,18 +125,17 @@ int main()
     Light lightBoid   = Light(glm::vec3(1.f));
 
     // RANDOM
-    RandomVariableGenerator randGen;
 
     // PLANETS
-    int                    nbPlanets = static_cast<int>(randGen.triangular(1, 5, 10));
+    int                    nbPlanets = static_cast<int>(RNGenerator::triangular(1, 5, 10));
     std::vector<glm::vec4> planetsData;
     for (int i = 0; i < nbPlanets; i++)
     {
         // Générer des coordonnées aléatoires pour chaque axe à l'intérieur du cube
-        auto xCoord     = static_cast<float>(randGen.uniformDiscrete(-static_cast<int>(areaSize) + 1, static_cast<int>(areaSize) - 1));
-        auto yCoord     = static_cast<float>(randGen.uniformDiscrete(-static_cast<int>(areaSize) + 1, static_cast<int>(areaSize) - 1));
-        auto zCoord     = static_cast<int>(randGen.uniformDiscrete(-static_cast<int>(areaSize) + 1, static_cast<int>(areaSize - 3)));
-        auto planetSize = static_cast<float>(randGen.laplace(0.1, 0.2));
+        auto xCoord     = static_cast<float>(RNGenerator::uniformDiscrete(-static_cast<int>(areaSize) + 1, static_cast<int>(areaSize) - 1));
+        auto yCoord     = static_cast<float>(RNGenerator::uniformDiscrete(-static_cast<int>(areaSize) + 1, static_cast<int>(areaSize) - 1));
+        auto zCoord     = static_cast<float>(RNGenerator::uniformDiscrete(-static_cast<int>(areaSize) + 1, static_cast<int>(areaSize - 3)));
+        auto planetSize = static_cast<float>(RNGenerator::laplace(0.1, 0.2));
         if (planetSize < 0)
         {
             planetSize = -planetSize;
@@ -160,7 +159,7 @@ int main()
 
     std::vector<int> states = {static_cast<int>(MarkovChainSparkState::TextureUpdate), static_cast<int>(MarkovChainSparkState::PositionUpdate)};
 
-    MarkovChain markovChain(transitionMatrix, states, randGen);
+    MarkovChain markovChain(transitionMatrix, states);
 
     int  sparkState       = static_cast<int>((MarkovChainSparkState::TextureUpdate));
     auto playerLightState = static_cast<float>((MarkovChainLightState::LightOn));
@@ -169,7 +168,7 @@ int main()
     glm::vec3 sparkMatrix    = glm::vec3(0.0f, 0.0f, 0.0f);
     int       time           = 0;
     GLuint    currentTexture = sparkBake1;
-    if (randGen.bernoulli(0.5) == 1)
+    if (RNGenerator::bernoulli(0.5) == 1)
     {
         currentTexture = sparkBake1;
     }
@@ -223,27 +222,27 @@ int main()
             time = 0;
             if (sparkState == static_cast<int>(MarkovChainSparkState::TextureUpdate))
             {
-                currentTexture = textures[randGen.hypergeometric(static_cast<int>(textures.size()), 2, 1)];
+                currentTexture = textures[RNGenerator::hypergeometric(static_cast<int>(textures.size()), 2, 1)];
             }
             else
             {
-                sparkMatrix = glm::vec3(randGen.normal(2.5, 2), randGen.normal(2.5, 2), randGen.normal(2.5, 2));
+                sparkMatrix = glm::vec3(RNGenerator::normal(2.5, 2), RNGenerator::normal(2.5, 2), RNGenerator::normal(2.5, 2));
             }
             if (sparkState == static_cast<int>(MarkovChainLightState::LightOn))
             {
-                lightPlayer = Light(glm::vec3(static_cast<float>(randGen.exponential(0.1))));
+                lightPlayer = Light(glm::vec3(static_cast<float>(RNGenerator::exponential(0.1))));
             }
             else
             {
                 lightPlayer = Light(glm::vec3(80.f));
             }
-            timer = randGen.geometric(0.01);
+            timer = RNGenerator::geometric(0.01);
         }
         time++;
         spark3D.draw(sparkMatrix, glm::vec3{1.}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, currentTexture);
-        for (auto rockPosition : planetsData)
+        for (auto planetPosition : planetsData)
         {
-            planet.draw(glm::vec3{rockPosition[0], rockPosition[1], rockPosition[2]}, glm::vec3{rockPosition[3]}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, rockBake);
+            planet.draw(glm::vec3{planetPosition[0], planetPosition[1], planetPosition[2]}, glm::vec3{planetPosition[3]}, 0, glm::vec3(1.f), ProjMatrix, viewMatrix, shader3D, planetBake);
         }
 
         player3D.draw(player.getPosition(), glm::vec3{1.}, -100, glm::vec3(0.0f, 1.0f, 0.0f), ProjMatrix, viewMatrix, shader3D, playerBake);
