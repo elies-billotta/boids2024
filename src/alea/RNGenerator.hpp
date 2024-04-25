@@ -4,7 +4,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
-#include <stdexcept>
 
 class RNGenerator {
 public:

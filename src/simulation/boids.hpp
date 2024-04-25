@@ -1,5 +1,5 @@
 #include "glm/fwd.hpp"
-#include "p6/p6.h"
+#include "glm/glm.hpp"
 
 #pragma once
 
@@ -11,12 +11,12 @@ public:
     // Methods
     void move();
     void noBounce(float areaSize, glm::vec3 positionCube);
-    void bounce(float& areaSize, const float& size, const float& strength, const float& scope, glm::vec3 positionCube);
+    void bounce(float& areaSize, const float& strength, glm::vec3 positionCube, const float& scope);
 
     // GETTERS
-    glm::vec3 getPosition();
-    glm::vec3 getDirection();
-    float     getAngle();
+    glm::vec3 getPosition() const;
+    glm::vec3 getDirection() const ;
+    float     getAngle() const;
 
     // SETTERS
     glm::vec3 setDirection(glm::vec3 direction);

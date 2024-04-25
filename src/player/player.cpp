@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "../src/player/player.hpp"
 
 Player::Player(glm::vec3 pos)
@@ -8,9 +10,9 @@ Player::Player(glm::vec3 pos)
 
 void Player::computeDirectionVectors()
 {
-    m_FrontVector = glm::vec3(cos(m_Phi) * sin(m_Theta), sin(m_Phi), cos(m_Phi) * cos(m_Theta));
+    m_FrontVector = glm::vec3(std::cos(m_Phi) * std::sin(m_Theta), std::sin(m_Phi), std::cos(m_Phi) * std::cos(m_Theta));
 
-    m_LeftVector = glm::vec3(sin(m_Theta - glm::half_pi<float>()), 0.0f, cos(m_Theta - glm::half_pi<float>()));
+    m_LeftVector = glm::vec3(std::sin(m_Theta - glm::half_pi<float>()), 0.0f, std::cos(m_Theta - glm::half_pi<float>()));
 
     m_UpVector = glm::cross(m_FrontVector, m_LeftVector);
 }
@@ -32,7 +34,7 @@ bool verifBorder(glm::vec3 position, Cube& cube)
     return true;
 }
 
-void Player::move(const p6::Context& ctx, Player& player, Camera& camera, Cube& cube)
+void Player::move(const p6::Context& ctx, Camera& camera, Cube& cube)
 {
     glm::vec3 savePos = m_pos;
 
