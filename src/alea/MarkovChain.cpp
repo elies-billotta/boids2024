@@ -1,13 +1,16 @@
 #include "MarkovChain.hpp"
 
-MarkovChain::MarkovChain(std::vector<std::vector<double>> matrix, std::vector<int> states, RandomVariableGenerator& rng)
-    : transitionMatrix(matrix), states(states), generator(rng) {}
+#include <utility>
+#include "alea/RNGenerator.hpp"
+
+MarkovChain::MarkovChain(std::vector<std::vector<double>> matrix, std::vector<int> states)
+    : transitionMatrix(std::move(matrix)), states(std::move(states)) {}
 
 int MarkovChain::nextState(int currentState)
 {
-    double randomValue = generator.RAND();
+    double randomValue = RNGenerator::RAND();
 
-    int currentStateIndex = -1;
+    size_t currentStateIndex = -1;
     for (size_t i = 0; i < states.size(); ++i)
     {
         if (states[i] == currentState)
