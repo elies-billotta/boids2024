@@ -127,7 +127,7 @@ int main()
     // RANDOM
 
     // PLANETS
-    int                    nbPlanets = static_cast<int>(RNGenerator::triangular(1, 5, 10));
+    int                    nbPlanets = static_cast<int>(RNGenerator::triangular(1, 8, 10));
     std::vector<glm::vec4> planetsData;
     for (int i = 0; i < nbPlanets; i++)
     {
@@ -162,7 +162,7 @@ int main()
     MarkovChain markovChain(transitionMatrix, states);
 
     int  sparkState       = static_cast<int>((MarkovChainSparkState::TextureUpdate));
-    auto playerLightState = static_cast<float>((MarkovChainLightState::LightOn));
+    auto lightCenterState = static_cast<float>((MarkovChainLightState::LightOn));
 
     glEnable(GL_DEPTH_TEST);
     glm::vec3 sparkMatrix    = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -213,7 +213,7 @@ int main()
         /* *** LIGHT *** */
         shader3D.use();
         sparkState       = markovChain.nextState(sparkState);
-        playerLightState = static_cast<float>(markovChain.nextState(static_cast<int>(playerLightState)));
+        lightCenterState = static_cast<float>(markovChain.nextState(static_cast<int>(lightCenterState)));
         lightPlayer.passToShader(shader3D, glm::vec3(148.0f / 255.0f, 203.0f / 255.0f, 246.0f / 255.0f), ProjMatrix, viewMatrix, glm::vec3(0.f));
         lightCenter.passToShader2(shader3D, glm::vec3(80.0f, 0.f, 50.f), ProjMatrix, viewMatrix, player.getPosition());
 
@@ -222,7 +222,7 @@ int main()
             time = 0;
             if (sparkState == static_cast<int>(MarkovChainSparkState::TextureUpdate))
             {
-                currentTexture = textures[RNGenerator::hypergeometric(static_cast<int>(textures.size()), 2, 1)];
+                currentTexture = textures[RNGenerator::hypergeometric(static_cast<int>(textures.size()), 1, 4)];
             }
             else
             {
